@@ -5,6 +5,11 @@
 #include "imgui_impl_allegro5.h"
 
 #include "Window.h"
+#include "Settings.h"
+#include "knightmare3config.h"
+#ifndef DEBUG
+#define DEBUG false
+#endif
 
 void processEvents(Window &window, bool &running) 
 {
@@ -19,38 +24,47 @@ void processEvents(Window &window, bool &running)
     }
 }
 
+
+
 // Draw the screen contents
-void drawFrame(Window window) 
+void drawFrame(Window window, Settings &settings) 
 {
     ImGui_ImplAllegro5_NewFrame();
     ImGui::NewFrame();
-    ImGui::ShowDemoWindow();
+    if (settings.showDemoWindow) {
+        ImGui::ShowDemoWindow();
+    }
+    if (DEBUG) { //Only for Developers
+        window.buildDebugWindow(settings);
+    }
     window.render();
     al_clear_to_color(al_map_rgba_f(0, 0.3, 0.1, 0.2));
     ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
 }
 
-void processFrame(Window &window, bool &running) 
+void processFrame(Window &window, Settings &settings, bool &running) 
 {
     while (window.getEvent())
     {
         processEvents(window, running);
     }
-    drawFrame(window);
+    drawFrame(window, settings);
 }
 
-void mainLoop(Window window) 
+void mainLoop() 
 {
+    Window window;
+    Settings settings;
     bool running = true;
     while (running) {
-        processFrame(window, running);
+        processFrame(window, settings, running);
     }
     window.cleanExit();
 }
 
 int main() 
 {
-    Window window;
-    mainLoop(window);
+    
+    mainLoop();
 	return 0;
 }

@@ -4,6 +4,7 @@
 
 #include "imgui.h"
 #include "imgui_impl_allegro5.h"
+#include "Settings.h"
 
 
 Window::Window() 
@@ -12,6 +13,16 @@ Window::Window()
     createWindow();
     createEventQueue();
     setupImgui();
+}
+
+//Builds the Debug window for developer use only
+void Window::buildDebugWindow(Settings& settings)
+{
+    ImGui::Begin("Debug");
+
+    ImGui::Checkbox("Demo Window", &settings.showDemoWindow);//Shows what is possible with ImGui
+
+    ImGui::End();//end a ImGui definition like this always
 }
 
 void Window::installs()
