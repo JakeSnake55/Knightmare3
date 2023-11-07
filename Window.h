@@ -16,7 +16,7 @@ public:
 	ALLEGRO_EVENT event;
 	Settings settings;
 	Window();
-	void buildDebugWindow(Settings &settings);
+	void buildDebugWindow();
 	void cleanExit();
 	bool getEvent();
 	void render();

@@ -24,40 +24,42 @@ void processEvents(Window &window, bool &running)
     }
 }
 
-
-
 // Draw the screen contents
-void drawFrame(Window window, Settings &settings) 
+void drawFrame(Window &window) 
 {
     ImGui_ImplAllegro5_NewFrame();
     ImGui::NewFrame();
-    if (settings.showDemoWindow) {
+    if (window.settings.showDemoWindow) {
         ImGui::ShowDemoWindow();
     }
     if (DEBUG) { //Only for Developers
-        window.buildDebugWindow(settings);
+        window.buildDebugWindow();
     }
     window.render();
     al_clear_to_color(al_map_rgba_f(0, 0.3, 0.1, 0.2));
     ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
 }
 
-void processFrame(Window &window, Settings &settings, bool &running) 
+void processFrame(Window &window, bool &running) 
 {
     while (window.getEvent())
+    //Following occurs for every allegro event
     {
         processEvents(window, running);
     }
-    drawFrame(window, settings);
+    //Following occurs each time that the computer can
+    if (window.settings.waitForVSync) {//Should wait till screen refresh
+        al_wait_for_vsync();
+    }
+    drawFrame(window);
 }
 
 void mainLoop() 
 {
     Window window;
-    Settings settings;
     bool running = true;
     while (running) {
-        processFrame(window, settings, running);
+        processFrame(window, running);
     }
     window.cleanExit();
 }

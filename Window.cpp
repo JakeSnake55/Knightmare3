@@ -16,11 +16,12 @@ Window::Window()
 }
 
 //Builds the Debug window for developer use only
-void Window::buildDebugWindow(Settings& settings)
+void Window::buildDebugWindow()
 {
     ImGui::Begin("Debug");
 
     ImGui::Checkbox("Demo Window", &settings.showDemoWindow);//Shows what is possible with ImGui
+    ImGui::Checkbox("VSync", &settings.waitForVSync);//Pauses frames to achieve VSync
 
     ImGui::End();//end a ImGui definition like this always
 }
@@ -38,11 +39,12 @@ void Window::createWindow()
 {
     al_set_new_display_flags(ALLEGRO_RESIZABLE);
     display = al_create_display(1280, 720);
-    al_set_window_title(display, "Dear ImGui Allegro 5 example");
+    al_set_window_title(display, "Knightmare 3.0");
 }
 
 void Window::createEventQueue() 
 {
+    double FPS = 60.0;
     queue = al_create_event_queue();
     al_register_event_source(queue, al_get_display_event_source(display));
     al_register_event_source(queue, al_get_keyboard_event_source());
@@ -91,7 +93,7 @@ void Window::cleanExit()
 
 bool Window::getEvent() 
 {
-    return  al_get_next_event(queue, &event);;
+    return al_get_next_event(queue, &event);;
 }
 
 void Window::render()
