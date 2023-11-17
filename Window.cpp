@@ -22,6 +22,7 @@ void Window::buildDebugWindow()
 
     ImGui::Checkbox("Demo Window", &settings.showDemoWindow);//Shows what is possible with ImGui
     ImGui::Checkbox("VSync", &settings.waitForVSync);//Pauses frames to achieve VSync
+    ImGui::Checkbox("Primitives", &settings.drawPrimitives);//Draw triangles with allegroi
 
     ImGui::End();//end a ImGui definition like this always
 }
@@ -44,7 +45,7 @@ void Window::createWindow()
 
 void Window::createEventQueue() 
 {
-    double FPS = 60.0;
+    //double FPS = 60.0;
     queue = al_create_event_queue();
     al_register_event_source(queue, al_get_display_event_source(display));
     al_register_event_source(queue, al_get_keyboard_event_source());
@@ -99,5 +100,7 @@ bool Window::getEvent()
 void Window::render()
 {
     ImGui::Render(); //needed to avoid crash, dunno what it does
+    ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
     al_flip_display();
+    
 }
