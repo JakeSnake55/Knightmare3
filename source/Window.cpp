@@ -27,6 +27,36 @@ void Window::buildDebugWindow()
     ImGui::End();//end a ImGui definition like this always
 }
 
+void Window::buildMainMenu() 
+{
+   
+    static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
+
+    // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
+    // Based on your use case you may want one or the other.
+    const ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos( viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+
+    if (ImGui::Begin("Example: Fullscreen window",NULL, flags))
+    {
+        
+        ImGui::CheckboxFlags("ImGuiWindowFlags_NoBackground", &flags, ImGuiWindowFlags_NoBackground);
+        ImGui::CheckboxFlags("ImGuiWindowFlags_NoDecoration", &flags, ImGuiWindowFlags_NoDecoration);
+        ImGui::Indent();
+        ImGui::CheckboxFlags("ImGuiWindowFlags_NoTitleBar", &flags, ImGuiWindowFlags_NoTitleBar);
+        ImGui::CheckboxFlags("ImGuiWindowFlags_NoCollapse", &flags, ImGuiWindowFlags_NoCollapse);
+        ImGui::CheckboxFlags("ImGuiWindowFlags_NoScrollbar", &flags, ImGuiWindowFlags_NoScrollbar);
+        ImGui::Unindent();
+
+        if (&settings.showMainMenu && ImGui::Button("Close this window")) {
+            settings.showMainMenu = false;
+        }
+    }
+    ImGui::End();
+}
+
+
 void Window::installs()
 {
     al_init();

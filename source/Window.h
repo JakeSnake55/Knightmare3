@@ -17,6 +17,7 @@ public:
 	Settings settings;
 	Window();
 	void buildDebugWindow();
+	void buildMainMenu();
 	void cleanExit();
 	bool getEvent();
 	void render();

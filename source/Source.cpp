@@ -56,6 +56,9 @@ void drawFrame(Window &window)
         al_draw_prim(v,NULL,0,0,3,ALLEGRO_PRIM_TRIANGLE_LIST);
 
     }
+    if (window.settings.showMainMenu) {
+        window.buildMainMenu();
+    }
     if (DEBUG) { //Only for Developers
         window.buildDebugWindow();
     }
