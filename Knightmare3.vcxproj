@@ -157,26 +157,26 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="imconfig.h" />
-    <ClInclude Include="imgui.h" />
-    <ClInclude Include="imgui_impl_allegro5.h" />
-    <ClInclude Include="imgui_internal.h" />
-    <ClInclude Include="imstb_rectpack.h" />
-    <ClInclude Include="imstb_textedit.h" />
-    <ClInclude Include="imstb_truetype.h" />
-    <ClInclude Include="knightmare3config.h" />
-    <ClInclude Include="Settings.h" />
-    <ClInclude Include="Window.h" />
+    <ClInclude Include="source\imconfig.h" />
+    <ClInclude Include="source\imgui.h" />
+    <ClInclude Include="source\imgui_impl_allegro5.h" />
+    <ClInclude Include="source\imgui_internal.h" />
+    <ClInclude Include="source\imstb_rectpack.h" />
+    <ClInclude Include="source\imstb_textedit.h" />
+    <ClInclude Include="source\imstb_truetype.h" />
+    <ClInclude Include="source\knightmare3config.h" />
+    <ClInclude Include="source\Settings.h" />
+    <ClInclude Include="source\Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="imgui.cpp" />
-    <ClCompile Include="imgui_demo.cpp" />
-    <ClCompile Include="imgui_draw.cpp" />
-    <ClCompile Include="imgui_impl_allegro5.cpp" />
-    <ClCompile Include="imgui_tables.cpp" />
-    <ClCompile Include="imgui_widgets.cpp" />
-    <ClCompile Include="Source.cpp" />
-    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="source\imgui.cpp" />
+    <ClCompile Include="source\imgui_demo.cpp" />
+    <ClCompile Include="source\imgui_draw.cpp" />
+    <ClCompile Include="source\imgui_impl_allegro5.cpp" />
+    <ClCompile Include="source\imgui_tables.cpp" />
+    <ClCompile Include="source\imgui_widgets.cpp" />
+    <ClCompile Include="source\Source.cpp" />
+    <ClCompile Include="source\Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
