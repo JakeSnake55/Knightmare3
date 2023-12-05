@@ -1,14 +1,19 @@
 #include "Window.h"
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_primitives.h>
+#include <string.h>
+#include <sstream>
 
 #include "imgui.h"
 #include "imgui_impl_allegro5.h"
 #include "Settings.h"
+#include "World.h"
+#include "Files.h"
 
 
 Window::Window() 
 {
+    world.resize(0);
     installs();
     createWindow();
     createEventQueue();
@@ -27,6 +32,12 @@ void Window::buildDebugWindow()
     ImGui::End();//end a ImGui definition like this always
 }
 
+std::string append_number(std::string const& x, unsigned int num, char sep = '_') {
+  std::stringstream s;
+  s << x << sep << num;
+  return s.str();
+}//util for label names
+
 void Window::buildMainMenu() 
 {
    
@@ -38,8 +49,78 @@ void Window::buildMainMenu()
     ImGui::SetNextWindowPos( viewport->Pos);
     ImGui::SetNextWindowSize(viewport->Size);
 
-    if (ImGui::Begin("Example: Fullscreen window",NULL, flags))
+    if (ImGui::Begin("Main Menu",NULL, flags))
     {
+
+        if (ImGui::Button("New World")) 
+        {
+          settings.showMainMenu = false;
+          settings.makeNewWorld = true;
+          world.resize(world.size() + 1);
+        }
+        ImGui::SameLine();
+
+        if (ImGui::Button("Delete selected")) {
+          ImGui::OpenPopup("Delete.");
+        }
+          
+        
+        if (ImGui::BeginPopupModal("Delete.", NULL, ImGuiWindowFlags_AlwaysAutoResize)) 
+        {
+          ImGui::Text("All those beautiful files will be deleted.\nThis operation cannot be undone!");
+          ImGui::Separator();
+
+          //static int unused_i = 0;
+          //ImGui::Combo("Combo", &unused_i, "Delete\0Delete harder\0");
+
+          static bool dont_ask_me_next_time = false;
+          ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
+          ImGui::Checkbox("Don't ask me next time", &dont_ask_me_next_time);
+          ImGui::PopStyleVar();
+
+          if (ImGui::Button("OK", ImVec2(120, 0)))
+          { 
+            for (int i = 0; i < world.size(); i++) {
+              if (world[i].selected) {
+                world.erase(world.begin() + i);
+                i--;
+              }
+            }
+            ImGui::CloseCurrentPopup(); 
+          }
+          ImGui::SetItemDefaultFocus();
+          ImGui::SameLine();
+          if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
+          ImGui::EndPopup();
+        }
+        
+        for (int i = 0; i < world.size(); i++) {
+          
+          ImGui::Text(world[i].name.c_str());
+          ImGui::OpenPopupOnItemClick(append_number("##world", i).c_str(), ImGuiPopupFlags_MouseButtonLeft);
+          ImGui::SameLine();
+          ImGui::Checkbox(append_number("##select",i).c_str(), &world[i].selected);
+
+          if (ImGui::BeginPopup(append_number("##world", i).c_str())) 
+          {
+            ImGui::Text(world[i].name.c_str());
+            ImGui::SameLine();
+            ImGui::Text(std::to_string(world[i].seed).c_str());
+            if (ImGui::Button("play"))
+            {
+
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("edit"))
+            {
+              settings.currentId = i;
+              settings.makeNewWorld = true;
+            }
+            ImGui::EndPopup();
+          }
+
+          
+        }
         
         ImGui::CheckboxFlags("ImGuiWindowFlags_NoBackground", &flags, ImGuiWindowFlags_NoBackground);
         ImGui::CheckboxFlags("ImGuiWindowFlags_NoDecoration", &flags, ImGuiWindowFlags_NoDecoration);
@@ -54,6 +135,37 @@ void Window::buildMainMenu()
         }
     }
     ImGui::End();
+}
+
+void Window::buildWorldCreationMenu(int id) {
+  if (id == -1) {
+    id = world.size() - 1;
+  }
+  const ImGuiViewport* viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->Pos);
+  ImGui::SetNextWindowSize(viewport->Size);
+
+  static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
+  if (ImGui::Begin("World Menu", NULL, flags))
+  {
+    const int worldNameLength = 120;
+    char temp[worldNameLength] ;
+    strcpy_s(temp, world[id].name.c_str());
+    ImGui::InputTextWithHint("##world_name", "World name", temp, worldNameLength);
+    ImGui::Text("Seed");
+    ImGui::SameLine();
+    ImGui::InputInt("##world_seed", &world[id].seed);
+    
+    world[id].name = temp;
+
+    if (&settings.makeNewWorld && ImGui::Button("Create world")) {
+      file.addWorldFolder(world[id]);
+      settings.makeNewWorld = false;
+      settings.currentId = -1;
+      settings.showMainMenu = true;//Just for now whilst there aren't really actual files or anything so I can see the menu and stuff.
+    }
+  }
+  ImGui::End();
 }
 
 
