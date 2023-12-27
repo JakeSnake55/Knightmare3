@@ -8,4 +8,9 @@ public:
 	bool showMainMenu = true;
 	bool waitForVSync = true;
 	bool drawPrimitives = true;
+	bool turnCamera = false;
+	float FOV = 90;
+	float zoom = 1;
+	float x = 0;
+	float y = 0;
 };

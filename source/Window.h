@@ -1,6 +1,7 @@
 #pragma once
 #include <allegro5/allegro5.h>
 #include "Settings.h"
+#include "Camera.h"
 
 class Window 
 {
@@ -15,6 +16,7 @@ public:
 	ALLEGRO_EVENT_QUEUE* queue;
 	ALLEGRO_EVENT event;
 	Settings settings;
+	Camera camera;
 	Window();
 	void buildDebugWindow();
 	void buildMainMenu();

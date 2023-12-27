@@ -2,8 +2,8 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_primitives.h>
 
-#include "imgui.h"
-#include "imgui_impl_allegro5.h"
+#include "IMGUI/imgui.h"
+#include "IMGUI/imgui_impl_allegro5.h"
 #include "Settings.h"
 
 
@@ -22,8 +22,13 @@ void Window::buildDebugWindow()
 
     ImGui::Checkbox("Demo Window", &settings.showDemoWindow);//Shows what is possible with ImGui
     ImGui::Checkbox("VSync", &settings.waitForVSync);//Pauses frames to achieve VSync
-    ImGui::Checkbox("Primitives", &settings.drawPrimitives);//Draw triangles with allegroi
-
+    ImGui::Checkbox("Primitives", &settings.drawPrimitives);//Draw triangles with allegro
+    ImGui::Checkbox("Activate Camera", &settings.turnCamera);//Draw triangles with allegro
+    ImGui::SliderFloat("FOV", &settings.FOV,1,180,"%.3f");
+    ImGui::SliderFloat("Zoom", &settings.zoom, 0, 10, "%.3f");
+    ImGui::SliderFloat("X", &settings.x, 0, 2*ALLEGRO_PI, "%.3f");
+    ImGui::SliderFloat("Y", &settings.y, 0, 2 * ALLEGRO_PI, "%.3f");
+    ImGui::Text("view = %f, %f", camera.cameraPitch(), camera.cameraYaw());
     ImGui::End();//end a ImGui definition like this always
 }
 
@@ -51,6 +56,8 @@ void Window::buildMainMenu()
 
         if (&settings.showMainMenu && ImGui::Button("Close this window")) {
             settings.showMainMenu = false;
+            settings.turnCamera = true;
+            al_set_mouse_xy(display, al_get_display_width(display) / 2, al_get_display_height(display) / 2);
         }
     }
     ImGui::End();
@@ -89,7 +96,6 @@ void Window::setupImgui()
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
@@ -112,6 +118,7 @@ void Window::setupImgui()
     //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
     //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
     //IM_ASSERT(font != nullptr);
+  
 }
 
 void Window::cleanExit() 

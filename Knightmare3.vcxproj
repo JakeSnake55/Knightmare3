@@ -104,7 +104,7 @@
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -157,25 +157,31 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="source\imconfig.h" />
-    <ClInclude Include="source\imgui.h" />
-    <ClInclude Include="source\imgui_impl_allegro5.h" />
-    <ClInclude Include="source\imgui_internal.h" />
-    <ClInclude Include="source\imstb_rectpack.h" />
-    <ClInclude Include="source\imstb_textedit.h" />
-    <ClInclude Include="source\imstb_truetype.h" />
+    <ClInclude Include="source\Camera.h" />
+    <ClInclude Include="source\IMGUI\imconfig.h" />
+    <ClInclude Include="source\IMGUI\imgui.h" />
+    <ClInclude Include="source\IMGUI\imgui_impl_allegro5.h" />
+    <ClInclude Include="source\IMGUI\imgui_internal.h" />
+    <ClInclude Include="source\IMGUI\imstb_rectpack.h" />
+    <ClInclude Include="source\IMGUI\imstb_textedit.h" />
+    <ClInclude Include="source\IMGUI\imstb_truetype.h" />
     <ClInclude Include="source\knightmare3config.h" />
+    <ClInclude Include="source\Projection.h" />
     <ClInclude Include="source\Settings.h" />
+    <ClInclude Include="source\Vector.h" />
     <ClInclude Include="source\Window.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\imgui.cpp" />
-    <ClCompile Include="source\imgui_demo.cpp" />
-    <ClCompile Include="source\imgui_draw.cpp" />
-    <ClCompile Include="source\imgui_impl_allegro5.cpp" />
-    <ClCompile Include="source\imgui_tables.cpp" />
-    <ClCompile Include="source\imgui_widgets.cpp" />
+    <ClCompile Include="source\Camera.cpp" />
+    <ClCompile Include="source\IMGUI\imgui.cpp" />
+    <ClCompile Include="source\IMGUI\imgui_demo.cpp" />
+    <ClCompile Include="source\IMGUI\imgui_draw.cpp" />
+    <ClCompile Include="source\IMGUI\imgui_impl_allegro5.cpp" />
+    <ClCompile Include="source\IMGUI\imgui_tables.cpp" />
+    <ClCompile Include="source\IMGUI\imgui_widgets.cpp" />
+    <ClCompile Include="source\Projection.cpp" />
     <ClCompile Include="source\Source.cpp" />
+    <ClCompile Include="source\Vector.cpp" />
     <ClCompile Include="source\Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
