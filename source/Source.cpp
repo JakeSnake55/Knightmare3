@@ -33,11 +33,19 @@ void processEvents(Window &window, bool &running)
     if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_D)))
         window.camera.velocity.x--;
 
-    if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_S)))
-        window.camera.velocity.z--;
+    if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_S))) 
+    {
+        window.camera.velocity.x -= window.camera.forwards.x;
+        window.camera.velocity.y -= window.camera.forwards.y;
+        window.camera.velocity.z -= window.camera.forwards.z;
+    }
 
-    if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_W)))
-        window.camera.velocity.z++;
+    if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_W))) 
+    {
+        window.camera.velocity.x += window.camera.forwards.x;
+        window.camera.velocity.y += window.camera.forwards.y;
+        window.camera.velocity.z += window.camera.forwards.z;
+    }
     
     if (window.event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
     {
