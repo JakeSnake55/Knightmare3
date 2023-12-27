@@ -13,4 +13,6 @@ public:
 	float zoom = 1;
 	float x = 0;
 	float y = 0;
+	bool makeNewWorld = false;
+	int currentId = -1;
 };

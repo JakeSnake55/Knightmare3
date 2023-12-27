@@ -115,6 +115,9 @@ void drawFrame(Window &window)
     if (window.settings.showMainMenu) {
         window.buildMainMenu();
     }
+    if (window.settings.makeNewWorld) {
+      window.buildWorldCreationMenu(window.settings.currentId);
+    }
     if (DEBUG) { //Only for Developers
         window.buildDebugWindow();
     }

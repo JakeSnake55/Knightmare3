@@ -90,6 +90,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <Allegro_AddonColor>true</Allegro_AddonColor>
+    <Allegro_AddonPrimitives>true</Allegro_AddonPrimitives>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -130,6 +132,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -157,6 +160,7 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Files.h" />
     <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\IMGUI\imconfig.h" />
     <ClInclude Include="source\IMGUI\imgui.h" />
@@ -170,8 +174,10 @@
     <ClInclude Include="source\Settings.h" />
     <ClInclude Include="source\Vector.h" />
     <ClInclude Include="source\Window.h" />
+    <ClInclude Include="source\World.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\Files.cpp" />
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\IMGUI\imgui.cpp" />
     <ClCompile Include="source\IMGUI\imgui_demo.cpp" />
@@ -183,6 +189,7 @@
     <ClCompile Include="source\Source.cpp" />
     <ClCompile Include="source\Vector.cpp" />
     <ClCompile Include="source\Window.cpp" />
+    <ClCompile Include="source\World.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
