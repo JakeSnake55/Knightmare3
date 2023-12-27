@@ -7,13 +7,19 @@
 class Camera
 {
 private:
-	uint32_t yaw;
-	uint32_t pitch;
-	Vector right;
-	Vector up;
+	uint16_t yaw;
+	uint16_t pitch;
+	
 
 public:
+	Vector forwards;
+	Vector left;
+	Vector position;
+	Vector velocity;
 	Camera();
+
+	void findVectors();
+
 	//returns current yaw value from 0 to 2pi
 	double cameraYaw();
 	//returns current pitch value from 0 to 2pi

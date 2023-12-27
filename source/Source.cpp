@@ -27,7 +27,17 @@ void processEvents(Window &window, bool &running)
     if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Escape)))
         running = false;
 
-   
+    if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_A)))
+        window.camera.velocity.x++;
+
+    if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_D)))
+        window.camera.velocity.x--;
+
+    if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_S)))
+        window.camera.velocity.z--;
+
+    if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_W)))
+        window.camera.velocity.z++;
     
     if (window.event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
     {
@@ -91,15 +101,11 @@ void drawFrame(Window &window)
         ALLEGRO_TRANSFORM camera;
         
         
-        float x = window.camera.cameraYaw();
-        float y = window.camera.cameraPitch();
-        float posX = 0;
-        float posY = 0;
-        float posZ = 4;
+        window.camera.findVectors();
         
         al_build_camera_transform(&camera, 
-            posX,        posY, posZ, 
-            posX-sin(-x)*cos(y), posY-sin(y), posZ-cos(-x)*cos(y), 
+            window.camera.position.x, window.camera.position.y, window.camera.position.z,
+            window.camera.position.x + window.camera.forwards.x, window.camera.position.y + window.camera.forwards.y, window.camera.position.z + window.camera.forwards.z,
             0,        1, 0);
         al_use_transform(&camera);
 
@@ -127,16 +133,24 @@ void drawFrame(Window &window)
 
 void processFrame(Window &window, bool &running) 
 {
+    window.camera.velocity.x = 0;
+    window.camera.velocity.y = 0;
+    window.camera.velocity.z = 0;
+
     while (window.getEvent())
     //Following occurs for every allegro event
     {
         processEvents(window, running);
     }
+    vector_normalize(window.camera.velocity);
 
     //Following occurs each time that the computer can
     if (window.settings.waitForVSync) {//Should wait till screen refresh
         al_wait_for_vsync();
     }
+    vector_mul(window.camera.velocity, ImGui::GetIO().DeltaTime);
+    
+    vector_iadd(&window.camera.position, window.camera.velocity);
     drawFrame(window);
 }
 
