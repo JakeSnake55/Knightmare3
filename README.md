@@ -9,8 +9,9 @@ Current features:
 
 Work in Progress:
 	Perspectives from Allegro
-	Main Menu system
+	Main Menu system -Somewhat satisfied with worldlist, but selected world info is not yet complete
 
 Planned Features:
 	Skybox generator from Knightmare 1st version
 	Texture Baker for Sun and Moon textures
+	UDP hole punching (or better) multiplayer (means no servers, just connect to friends)

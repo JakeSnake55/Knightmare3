@@ -4,11 +4,13 @@
 #include <string.h>
 #include <sstream>
 
+#include "IMGUI/imgui_internal.h"
 #include "IMGUI/imgui.h"
 #include "IMGUI/imgui_impl_allegro5.h"
 #include "Settings.h"
 #include "World.h"
 #include "Files.h"
+
 
 
 Window::Window() 
@@ -54,94 +56,78 @@ void Window::buildMainMenu()
     ImGui::SetNextWindowPos( viewport->Pos);
     ImGui::SetNextWindowSize(viewport->Size);
 
-    if (ImGui::Begin("Main Menu",NULL, flags))
+    if (ImGui::Begin("Main Menu", NULL, flags))
     {
+        bool NewWorldButton = false;
 
-        if (ImGui::Button("New World")) 
+        //set a bool to process event at end of function
+        if (ImGui::Button("New World"))
         {
-          settings.showMainMenu = false;
-          settings.makeNewWorld = true;
-          world.resize(world.size() + 1);
+            NewWorldButton = true;
+        }
+        ImGui::SameLine();
+        ImGui::BeginDisabled(world.size() == 0);
+        ImGui::Button("Copy World");
+        ImGui::EndDisabled();
+
+        // Left
+        static int selected = 0;
+        {
+            ImGui::BeginChild("left pane", ImVec2(157, al_get_display_height(display)-40), true, ImGuiWindowFlags_NoScrollbar);
+            for (int i = 0; i < world.size(); i++) 
+            {
+                if (ImGui::Selectable(world[i].name.c_str(), selected == i))
+                    selected = i;
+            }
+            ImGui::EndChild();
         }
         ImGui::SameLine();
 
-        if (ImGui::Button("Delete selected")) {
-          ImGui::OpenPopup("Delete.");
-        }
-          
-        
-        if (ImGui::BeginPopupModal("Delete.", NULL, ImGuiWindowFlags_AlwaysAutoResize)) 
-        {
-          ImGui::Text("All those beautiful files will be deleted.\nThis operation cannot be undone!");
-          ImGui::Separator();
-
-          //static int unused_i = 0;
-          //ImGui::Combo("Combo", &unused_i, "Delete\0Delete harder\0");
-
-          static bool dont_ask_me_next_time = false;
-          ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
-          ImGui::Checkbox("Don't ask me next time", &dont_ask_me_next_time);
-          ImGui::PopStyleVar();
-
-          if (ImGui::Button("OK", ImVec2(120, 0)))
-          { 
-            for (int i = 0; i < world.size(); i++) {
-              if (world[i].selected) {
-                world.erase(world.begin() + i);
-                i--;
-              }
-            }
-            ImGui::CloseCurrentPopup(); 
-          }
-          ImGui::SetItemDefaultFocus();
-          ImGui::SameLine();
-          if (ImGui::Button("Cancel", ImVec2(120, 0))) { ImGui::CloseCurrentPopup(); }
-          ImGui::EndPopup();
-        }
-        
-        for (int i = 0; i < world.size(); i++) {
-          
-          ImGui::Text(world[i].name.c_str());
-          ImGui::OpenPopupOnItemClick(append_number("##world", i).c_str(), ImGuiPopupFlags_MouseButtonLeft);
-          ImGui::SameLine();
-          ImGui::Checkbox(append_number("##select",i).c_str(), &world[i].selected);
-
-          if (ImGui::BeginPopup(append_number("##world", i).c_str())) 
-          {
-            ImGui::Text(world[i].name.c_str());
-            ImGui::SameLine();
-            ImGui::Text(std::to_string(world[i].seed).c_str());
-            if (ImGui::Button("play"))
+        // Right
+        if(world.size()>0){
+            ImGui::BeginGroup();
+            ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+            ImGui::Text(world[selected].name.c_str());
+            ImGui::Separator();
+            if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
             {
-
+                if (ImGui::BeginTabItem("Description"))
+                {
+                    if (ImGui::Button("Play")) 
+                    {
+                        settings.turnCamera = true;
+                        settings.currentId = selected;
+                        settings.showMainMenu = false;
+                    }
+                    ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ");
+                    ImGui::EndTabItem();
+                }
+                if (ImGui::BeginTabItem("Details"))
+                {
+                    ImGui::Text("SEED: %d",world[selected].seed);
+                    ImGui::EndTabItem();
+                }
+                ImGui::EndTabBar();
             }
-            ImGui::SameLine();
-            if (ImGui::Button("edit"))
-            {
-              settings.currentId = i;
-              settings.makeNewWorld = true;
-            }
-            ImGui::EndPopup();
-          }
+            ImGui::EndChild();
 
-          
+            ImGui::EndGroup();
         }
-        
-        ImGui::CheckboxFlags("ImGuiWindowFlags_NoBackground", &flags, ImGuiWindowFlags_NoBackground);
-        ImGui::CheckboxFlags("ImGuiWindowFlags_NoDecoration", &flags, ImGuiWindowFlags_NoDecoration);
-        ImGui::Indent();
-        ImGui::CheckboxFlags("ImGuiWindowFlags_NoTitleBar", &flags, ImGuiWindowFlags_NoTitleBar);
-        ImGui::CheckboxFlags("ImGuiWindowFlags_NoCollapse", &flags, ImGuiWindowFlags_NoCollapse);
-        ImGui::CheckboxFlags("ImGuiWindowFlags_NoScrollbar", &flags, ImGuiWindowFlags_NoScrollbar);
-        ImGui::Unindent();
 
-        if (&settings.showMainMenu && ImGui::Button("Close this window")) {
+        //Process button presses at end
+        if (NewWorldButton) {
             settings.showMainMenu = false;
-            settings.turnCamera = true;
-            al_set_mouse_xy(display, al_get_display_width(display) / 2, al_get_display_height(display) / 2);
+            settings.makeNewWorld = true;
+            world.resize(world.size() + 1);
+            NewWorldButton = false;
         }
+
+        ImGui::End();
     }
-    ImGui::End();
+
+    
+        
+
 }
 
 void Window::buildWorldCreationMenu(int id) {

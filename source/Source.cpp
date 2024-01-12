@@ -27,6 +27,18 @@ void processEvents(Window &window, bool &running)
     if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_Escape)))
         running = false;
 
+    if (window.event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
+    {
+        ImGui_ImplAllegro5_InvalidateDeviceObjects();
+        al_acknowledge_resize(window.display);
+        ImGui_ImplAllegro5_CreateDeviceObjects();
+    }
+
+    if (!window.settings.turnCamera) 
+    {
+        return;
+    }
+
     if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_A)))
         window.camera.velocity.x++;
 
@@ -47,20 +59,12 @@ void processEvents(Window &window, bool &running)
         window.camera.velocity.z += window.camera.forwards.z;
     }
     
-    if (window.event.type == ALLEGRO_EVENT_DISPLAY_RESIZE)
-    {
-        ImGui_ImplAllegro5_InvalidateDeviceObjects();
-        al_acknowledge_resize(window.display);
-        ImGui_ImplAllegro5_CreateDeviceObjects();
-    }
     if (window.event.type == ALLEGRO_EVENT_MOUSE_AXES)
     {
-        if (window.settings.turnCamera) {
-            window.camera.addPitch(window.event.mouse.dy);
-            window.camera.addYaw(window.event.mouse.dx);
-            al_get_display_height(window.display);
-            al_set_mouse_xy(window.display, al_get_display_width(window.display)/2 , al_get_display_height(window.display)/2);
-        }
+        window.camera.addPitch(window.event.mouse.dy);
+        window.camera.addYaw(window.event.mouse.dx);
+        al_get_display_height(window.display);
+        al_set_mouse_xy(window.display, al_get_display_width(window.display)/2 , al_get_display_height(window.display)/2);
     }
 }
 
