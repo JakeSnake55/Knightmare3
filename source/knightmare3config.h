@@ -4,4 +4,4 @@
 //Used to disable or enable functions for end users
 #define DEBUG true
 
-#define SCALE 100
+#define SCALE 0.03

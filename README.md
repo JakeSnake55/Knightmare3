@@ -23,3 +23,9 @@ Planned Features:
  Known Issues:
  	Window.cpp uses strcpy_s, which on linux appears unknown? maybe we can use strcpy instead?
  	Linux version has excessively sensitive camera movement, and mouse is not locked in position during mouse movement.
+
+
+Error Codes:
+0 : No Issues detected
+1 : Could not initialize Allegro
+2 : Could not detect ImGui

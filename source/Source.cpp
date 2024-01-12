@@ -40,38 +40,34 @@ void processEvents(Window &window, bool &running)
     }
 
     if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_A)))
-        window.camera.velocity.x++;
+        camera_move_along_direction(&window.camera, -1, 0);
 
     if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_D)))
-        window.camera.velocity.x--;
+        camera_move_along_direction(&window.camera,1, 0);
 
     if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_S))) 
     {
-        window.camera.velocity.x -= window.camera.forwards.x;
-        window.camera.velocity.y -= window.camera.forwards.y;
-        window.camera.velocity.z -= window.camera.forwards.z;
+        camera_move_along_direction(&window.camera, 0, -1);
     }
 
     if (ImGui::IsKeyDown(ImGui::GetKeyIndex(ImGuiKey_W))) 
     {
-        window.camera.velocity.x += window.camera.forwards.x;
-        window.camera.velocity.y += window.camera.forwards.y;
-        window.camera.velocity.z += window.camera.forwards.z;
+        camera_move_along_ground(&window.camera, 0, 1);
     }
     
     if (window.event.type == ALLEGRO_EVENT_MOUSE_AXES)
     {
-        window.camera.addPitch(window.event.mouse.dy);
-        window.camera.addYaw(window.event.mouse.dx);
-        al_get_display_height(window.display);
+        camera_rotate_around_axis(&window.camera, window.camera.right, -(double)window.event.mouse.dy*SCALE);
+        camera_rotate_around_axis(&window.camera, window.camera.upwards, -(double)window.event.mouse.dx*SCALE);
+        
         al_set_mouse_xy(window.display, al_get_display_width(window.display)/2 , al_get_display_height(window.display)/2);
     }
 }
 
 ALLEGRO_VERTEX v[] = {
-    {.x = -1, .y = 0, .z = 0, .u = -1, .v = 0, .color = al_map_rgb(255,255,0)},
-    {.x = 0, .y = -2, .z = 0, .u = 0, .v = -2, .color = al_map_rgb(255,255,0)},
-    {.x = -2, .y = -2, .z = 0, .u = -2, .v = -2, .color = al_map_rgb(255,255,0)} };
+    {.x = -1, .y = 0, .z = -1, .u = -1, .v = 0, .color = al_map_rgb(255,255,0)},
+    {.x = 0, .y = -2, .z = -1, .u = 0, .v = -2, .color = al_map_rgb(255,255,0)},
+    {.x = -2, .y = -2, .z = -1, .u = -2, .v = -2, .color = al_map_rgb(255,255,0)} };
 float x = 0;
 float y = -1;
 float z = 3;
@@ -112,13 +108,12 @@ void drawFrame(Window &window)
 
         ALLEGRO_TRANSFORM camera;
         
-        
-        window.camera.findVectors();
+
         
         al_build_camera_transform(&camera, 
             window.camera.position.x, window.camera.position.y, window.camera.position.z,
-            window.camera.position.x + window.camera.forwards.x, window.camera.position.y + window.camera.forwards.y, window.camera.position.z + window.camera.forwards.z,
-            0,        1, 0);
+            window.camera.position.x - window.camera.forwards.x, window.camera.position.y - window.camera.forwards.y, window.camera.position.z - window.camera.forwards.z,
+            0,1,0);
         al_use_transform(&camera);
 
         // At a z distance of 4 with a 90° hfov everything would be scaled

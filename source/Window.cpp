@@ -35,7 +35,7 @@ void Window::buildDebugWindow()
     ImGui::SliderFloat("Zoom", &settings.zoom, 0, 10, "%.3f");
     ImGui::SliderFloat("X", &settings.x, 0, 2*ALLEGRO_PI, "%.3f");
     ImGui::SliderFloat("Y", &settings.y, 0, 2 * ALLEGRO_PI, "%.3f");
-    ImGui::Text("view = %f, %f", camera.cameraPitch(), camera.cameraYaw());
+    
     ImGui::End();//end a ImGui definition like this always
 }
 
@@ -164,10 +164,15 @@ void Window::buildWorldCreationMenu(int id) {
 
 void Window::installs()
 {
-    al_init();
+    if (!al_init())
+        std::exit(1);
     al_install_keyboard();
     al_install_mouse();
     al_init_primitives_addon();
+
+#ifndef IMGUI_VERSION
+    std::exit(2);
+#endif // !IMGUI_VERSION
 }
 
 
