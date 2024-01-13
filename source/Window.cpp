@@ -20,6 +20,7 @@ Window::Window()
     createWindow();
     createEventQueue();
     setupImgui();
+    file.loadWorldFolder(world);
 }
 
 //Builds the Debug window for developer use only
@@ -118,7 +119,8 @@ void Window::buildMainMenu()
         if (NewWorldButton) {
             settings.showMainMenu = false;
             settings.makeNewWorld = true;
-            world.resize(world.size() + 1);
+            World w;
+            world.insert(world.begin(), w);
             NewWorldButton = false;
         }
 
@@ -132,7 +134,7 @@ void Window::buildMainMenu()
 
 void Window::buildWorldCreationMenu(int id) {
   if (id == -1) {
-    id = world.size() - 1;
+    id = 0;
   }
   const ImGuiViewport* viewport = ImGui::GetMainViewport();
   ImGui::SetNextWindowPos(viewport->Pos);

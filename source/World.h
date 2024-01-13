@@ -9,6 +9,4 @@ public:
   World();
   int seed;
   std::string name;
-  bool selected;
-
 };

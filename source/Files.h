@@ -14,6 +14,6 @@ public:
   //Removes 
   void removeWorldFolder(World currentWorld);
 
-  void loadWorldFolder(std::vector<World> worldList);
+  void loadWorldFolder(std::vector<World> &worldList);
 
 };
