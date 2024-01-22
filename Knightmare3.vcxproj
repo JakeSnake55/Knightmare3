@@ -160,6 +160,8 @@
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="source\Defs.h" />
+    <ClInclude Include="source\DrawCalls.h" />
     <ClInclude Include="source\Files.h" />
     <ClInclude Include="source\Camera.h" />
     <ClInclude Include="source\IMGUI\imconfig.h" />
@@ -170,13 +172,17 @@
     <ClInclude Include="source\IMGUI\imstb_textedit.h" />
     <ClInclude Include="source\IMGUI\imstb_truetype.h" />
     <ClInclude Include="source\knightmare3config.h" />
+    <ClInclude Include="source\PerlinNoiseGenerator.h" />
     <ClInclude Include="source\Projection.h" />
     <ClInclude Include="source\Settings.h" />
+    <ClInclude Include="source\Skybox.h" />
+    <ClInclude Include="source\TimeHandler.h" />
     <ClInclude Include="source\Vector.h" />
     <ClInclude Include="source\Window.h" />
     <ClInclude Include="source\World.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\DrawCalls.cpp" />
     <ClCompile Include="source\Files.cpp" />
     <ClCompile Include="source\Camera.cpp" />
     <ClCompile Include="source\IMGUI\imgui.cpp" />
@@ -185,8 +191,11 @@
     <ClCompile Include="source\IMGUI\imgui_impl_allegro5.cpp" />
     <ClCompile Include="source\IMGUI\imgui_tables.cpp" />
     <ClCompile Include="source\IMGUI\imgui_widgets.cpp" />
+    <ClCompile Include="source\Knightmare.cpp" />
+    <ClCompile Include="source\PerlinNoiseGenerator.cpp" />
     <ClCompile Include="source\Projection.cpp" />
     <ClCompile Include="source\Source.cpp" />
+    <ClCompile Include="source\TimeHandler.cpp" />
     <ClCompile Include="source\Vector.cpp" />
     <ClCompile Include="source\Window.cpp" />
     <ClCompile Include="source\World.cpp" />

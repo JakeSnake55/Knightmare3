@@ -1,3 +1,5 @@
+/*
+
 #include<allegro5/allegro5.h>
 #include<allegro5/allegro_primitives.h>
 
@@ -11,6 +13,7 @@
 #include "Camera.h"
 #include "Settings.h"
 #include "knightmare3config.h"
+#include "Skybox.h"
 #ifndef DEBUG true
 #define DEBUG false
 #endif
@@ -76,6 +79,7 @@ float z = 3;
 // Draw the screen contents
 void drawFrame(Window &window)
 {
+    timehandler::changeTime();
     ImGui_ImplAllegro5_NewFrame();
     ImGui::NewFrame();
 
@@ -123,6 +127,18 @@ void drawFrame(Window &window)
 
         al_draw_filled_rectangle(-1, -1, 1, 1, al_map_rgb(255,0,0));
         al_draw_prim(v,NULL,0,0,3,ALLEGRO_PRIM_TRIANGLE_LIST);
+
+        al_set_render_state(ALLEGRO_DEPTH_TEST, 0);
+
+        al_clear_depth_buffer(1);
+        ex.n = startSky;
+        
+        add_skybox(window.camera);
+
+        al_draw_prim(ex.v, NULL, NULL, startSky, endSky, ALLEGRO_PRIM_TRIANGLE_LIST);
+
+        al_clear_depth_buffer(1);
+        al_set_render_state(ALLEGRO_DEPTH_TEST, 1);
 
     }
     if (window.settings.showMainMenu) {
@@ -172,8 +188,9 @@ void mainLoop()
     window.cleanExit();
 }
 
-int main() 
+int _main() 
 {
     mainLoop();
 	return 0;
 }
+*/

@@ -1,9 +1,6 @@
 #pragma once
 #include <cmath>
-
-typedef struct {
-    float x, y, z;
-} Vector;
+#include "Defs.h"
 
 /* Calculate the dot product between two vectors. This corresponds to the
  * angle between them times their lengths.

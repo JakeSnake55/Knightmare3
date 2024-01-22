@@ -1,3 +1,4 @@
+
 #include "Window.h"
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_primitives.h>
@@ -10,6 +11,7 @@
 #include "Settings.h"
 #include "World.h"
 #include "Files.h"
+#include "Defs.h"
 
 
 
@@ -30,12 +32,16 @@ void Window::buildDebugWindow()
 
     ImGui::Checkbox("Demo Window", &settings.showDemoWindow);//Shows what is possible with ImGui
     ImGui::Checkbox("VSync", &settings.waitForVSync);//Pauses frames to achieve VSync
-    ImGui::Checkbox("Primitives", &settings.drawPrimitives);//Draw triangles with allegro
-    ImGui::Checkbox("Activate Camera", &settings.turnCamera);//Draw triangles with allegro
+    ImGui::Checkbox("WireFrame mode", &settings.wireFrame);
+    ImGui::Checkbox("Draw Terrain", &settings.drawTerrain);
+    ImGui::Checkbox("Redraw Chunks", &settings.redrawChunks);
+    ImGui::Checkbox("Draw Sky", &settings.drawSkybox);
+    ImGui::Checkbox("Debug Text (outdated)", &settings.writeDebug);
+    ImGui::Checkbox("Activate Camera", &settings.turnCamera);
+    ImGui::Checkbox("Activate Keyboard", &settings.keyboardSleep);
     ImGui::SliderFloat("FOV", &settings.FOV,1,180,"%.3f");
     ImGui::SliderFloat("Zoom", &settings.zoom, 0, 10, "%.3f");
-    ImGui::SliderFloat("X", &settings.x, 0, 2*ALLEGRO_PI, "%.3f");
-    ImGui::SliderFloat("Y", &settings.y, 0, 2 * ALLEGRO_PI, "%.3f");
+    
     
     ImGui::End();//end a ImGui definition like this always
 }
@@ -99,6 +105,9 @@ void Window::buildMainMenu()
                         settings.turnCamera = true;
                         settings.currentId = selected;
                         settings.showMainMenu = false;
+                        settings.drawTerrain = true;
+                        settings.drawSkybox = true;
+                        settings.keyboardSleep = true;
                     }
                     ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ");
                     ImGui::EndTabItem();
@@ -127,8 +136,6 @@ void Window::buildMainMenu()
         ImGui::End();
     }
 
-    
-        
 
 }
 
@@ -171,6 +178,8 @@ void Window::installs()
     al_install_keyboard();
     al_install_mouse();
     al_init_primitives_addon();
+    al_init_font_addon();
+    al_init_image_addon();
 
 #ifndef IMGUI_VERSION
     std::exit(2);
@@ -180,6 +189,7 @@ void Window::installs()
 
 void Window::createWindow() 
 {
+
     al_set_new_display_flags(ALLEGRO_RESIZABLE);
     display = al_create_display(1280, 720);
     al_set_window_title(display, "Knightmare 3.0");
@@ -201,9 +211,11 @@ void Window::setupImgui()
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
+    
 
     // Setup Platform/Renderer backends
     ImGui_ImplAllegro5_Init(display);
@@ -236,7 +248,7 @@ void Window::cleanExit()
 
 bool Window::getEvent() 
 {
-    return al_get_next_event(queue, &event);;
+    return al_get_next_event(queue, &event);
 }
 
 void Window::render()

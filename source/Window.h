@@ -4,7 +4,8 @@
 #include "World.h"
 #include "Files.h"
 #include "Settings.h"
-#include "Camera.h"
+#include "Defs.h"
+
 
 class Window 
 {
@@ -30,3 +31,4 @@ public:
 	bool getEvent();
 	void render();
 };
+
