@@ -36,10 +36,9 @@ void Window::buildDebugWindow()
     ImGui::Checkbox("Draw Terrain", &settings.drawTerrain);
     ImGui::Checkbox("Redraw Chunks", &settings.redrawChunks);
     ImGui::Checkbox("Draw Sky", &settings.drawSkybox);
-    ImGui::Checkbox("Debug Text (outdated)", &settings.writeDebug);
     ImGui::Checkbox("Activate Camera", &settings.turnCamera);
     ImGui::Checkbox("Activate Keyboard", &settings.keyboardSleep);
-    ImGui::SliderFloat("FOV", &settings.FOV,1,180,"%.3f");
+    ImGui::SliderFloat("FOV", &settings.FOV,0,ALLEGRO_PI,"%.3f");
     ImGui::SliderFloat("Zoom", &settings.zoom, 0, 10, "%.3f");
     
     
@@ -108,6 +107,7 @@ void Window::buildMainMenu()
                         settings.drawTerrain = true;
                         settings.drawSkybox = true;
                         settings.keyboardSleep = true;
+                        settings.drawNewSkybox = true;
                     }
                     ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ");
                     ImGui::EndTabItem();

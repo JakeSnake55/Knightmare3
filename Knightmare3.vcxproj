@@ -194,6 +194,7 @@
     <ClCompile Include="source\Knightmare.cpp" />
     <ClCompile Include="source\PerlinNoiseGenerator.cpp" />
     <ClCompile Include="source\Projection.cpp" />
+    <ClCompile Include="source\Skybox.cpp" />
     <ClCompile Include="source\Source.cpp" />
     <ClCompile Include="source\TimeHandler.cpp" />
     <ClCompile Include="source\Vector.cpp" />
