@@ -5,6 +5,7 @@
 #include "Files.h"
 #include "Settings.h"
 #include "Defs.h"
+#include "IMGUI/imgui.h"
 
 
 class Window 
@@ -14,6 +15,12 @@ private:
 	void createWindow();
 	void createEventQueue();
 	void setupImgui();
+
+	void addStyles();
+
+	
+	ImVec4 StyleColors[ImGuiCol_COUNT];
+
 
 public:
 	ALLEGRO_DISPLAY* display;
@@ -26,6 +33,7 @@ public:
 	Window();
 	void buildDebugWindow();
 	void buildMainMenu();
+	void buildOptionMenu();
 	void buildWorldCreationMenu(int id = -1);
 	void cleanExit();
 	bool getEvent();

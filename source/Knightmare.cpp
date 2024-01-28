@@ -315,6 +315,10 @@ static void draw_scene(Window &window)
         }
     }
 
+    if (window.settings.showOptionsMenu) {
+        window.buildOptionMenu();
+    }
+
     if (window.settings.showMainMenu) {
         window.buildMainMenu();
     }

@@ -1,6 +1,6 @@
 #pragma once
 #include <allegro5/allegro5.h>
-//#define DEBUG
+#define DEBUG
 
 const int starCount = 100;
 const int spotsCount = 50;
@@ -11,6 +11,7 @@ class Settings
 public:
 	bool showDemoWindow = false;
 	bool showMainMenu = true;
+	bool showOptionsMenu = false;
 	bool waitForVSync = true;
 	bool wireFrame = false;
 	bool drawTerrain = false;

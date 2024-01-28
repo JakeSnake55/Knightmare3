@@ -23,6 +23,9 @@ Window::Window()
     createEventQueue();
     setupImgui();
     file.loadWorldFolder(world);
+    for (int i = 0; i < ImGuiCol_COUNT; i++) {
+        StyleColors[i] = ImGui::GetStyleColorVec4(i);
+    }
 }
 
 //Builds the Debug window for developer use only
@@ -51,10 +54,20 @@ std::string append_number(std::string const& x, unsigned int num, char sep = '_'
   return s.str();
 }//util for label names
 
+void Window::addStyles() {
+    for (int i = 0; i < ImGuiCol_COUNT; i++) {
+        ImGui::PushStyleColor(i, StyleColors[i]);
+    }
+}
+
+static void popStyles() {
+    ImGui::PopStyleColor(ImGuiCol_COUNT);
+}
+
 void Window::buildMainMenu() 
 {
-   
-    static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings;
+    addStyles();
+    static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus;
 
     // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
     // Based on your use case you may want one or the other.
@@ -75,6 +88,10 @@ void Window::buildMainMenu()
         ImGui::BeginDisabled(world.size() == 0);
         ImGui::Button("Copy World");
         ImGui::EndDisabled();
+        ImGui::SameLine(ImGui::GetWindowWidth()-65);
+        if (ImGui::Button("Options")) {
+            settings.showOptionsMenu = true;
+        }
 
         // Left
         static int selected = 0;
@@ -135,11 +152,47 @@ void Window::buildMainMenu()
 
         ImGui::End();
     }
-
+    popStyles();
 
 }
 
+void Window::buildOptionMenu()
+{
+
+    static ImGuiWindowFlags flags =  NULL ;
+
+    // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
+    // Based on your use case you may want one or the other.
+
+    addStyles();
+
+    if (ImGui::Begin("Option Menu", NULL, flags))
+    {
+        if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
+        {
+            if (ImGui::BeginTabItem("Colours")) {
+                for (int i = 0; i < ImGuiCol_COUNT; i++) {
+                    ImGui::ColorEdit4(ImGui::GetStyleColorName(i), (float*)&StyleColors[i]);
+                }
+                ImGui::EndTabItem();
+            }
+            
+
+            if (ImGui::BeginTabItem("Misc")) {
+                
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
+        }
+
+        ImGui::End();
+    }
+
+    popStyles();
+}
+
 void Window::buildWorldCreationMenu(int id) {
+  addStyles();
   if (id == -1) {
     id = 0;
   }
@@ -161,13 +214,23 @@ void Window::buildWorldCreationMenu(int id) {
     world[id].name = temp;
 
     if (&settings.makeNewWorld && ImGui::Button("Create world")) {
-      file.addWorldFolder(world[id]);
+        if (!(world[id].name.size() == 0))
+        {
+            file.addWorldFolder(world[id]);
+        }
+        else 
+        {
+            world.erase(world.begin());
+            world.resize(world.size() - 1);
+        }
+      
       settings.makeNewWorld = false;
       settings.currentId = -1;
-      settings.showMainMenu = true;//Just for now whilst there aren't really actual files or anything so I can see the menu and stuff.
+      settings.showMainMenu = true;
     }
   }
   ImGui::End();
+  popStyles();
 }
 
 
