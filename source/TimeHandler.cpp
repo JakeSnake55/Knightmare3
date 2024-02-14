@@ -1,5 +1,6 @@
 #include "TimeHandler.h"
 #include <allegro5/allegro5.h>
+#include "IMGUI/imgui.h"
 int offset = 0;
 int timePerSecond = 1;
 
@@ -15,7 +16,8 @@ namespace timehandler {
 
 	/*Changes the values for worldtime and day. Should be what determines all time based events*/
 	void changeTime() {
-		double currentTime = al_get_time();
+		
+		double currentTime = ImGui::GetTime();
 		elapsedTime = currentTime - offset;
 		/*Unlimited Framerate (Usually like 1000000000/second)(so long the draw requirements are low)*/
 		if (tickRate < 0) {

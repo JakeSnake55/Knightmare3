@@ -49,6 +49,7 @@ void Skybox::StarPositioner() {
         sunSpotsList[i].x = (11 - (sunSpotsList[i].s / 2)) * distribute(gen);
         sunSpotsList[i].y = (11 - (sunSpotsList[i].s / 2)) * distribute(gen);
     }
+    first = true;
 }
 
 
@@ -80,13 +81,19 @@ void Skybox::add_skybox(Window& window, Project &km, int &startSky, int &endSky)
 
     for (int i = 0; i < starCount; i++) {
 
-        float scale = starList[i].s;
         float distance = sqrt((pow(starList[i].x / 50.0 + light.x, 2) + pow(starList[i].y / 50.0 - light.y, 2)) * 2.5f) - 1.5f;
-        add_quad((double)p.x - starList[i].x - right.x * scale / 2 - up.x * scale / 2, (double)p.y + starList[i].y - right.y * scale / 2 - up.x * scale / 2, (double)p.z - starList[i].z - right.z * scale / 2 - up.x * scale / 2,
-            (double)scale * right.x, (double)scale * right.y, (double)scale * right.z,
-            (double)scale * up.x, (double)scale * up.y, (double)scale * up.z,
-            al_map_rgba_f(1, 1, 1, distance), al_map_rgba_f(1, 1, 1, distance), window, km.general);
+        if (first) {
+            float scale = starList[i].s;
+            add_quad((double)p.x - starList[i].x - right.x * scale / 2 - up.x * scale / 2, (double)p.y + starList[i].y - right.y * scale / 2 - up.x * scale / 2, (double)p.z - starList[i].z - right.z * scale / 2 - up.x * scale / 2,
+                (double)scale * right.x, (double)scale * right.y, (double)scale * right.z,
+                (double)scale * up.x, (double)scale * up.y, (double)scale * up.z,
+                al_map_rgba_f(1, 1, 1, distance), al_map_rgba_f(1, 1, 1, distance), window, km.general);
+        }
+        else {
+            km.general.v[i].color.a = distance;
+        }
     }
+    first = false;
 
     // Moon 
     add_quad((double)p.x - light.x * 50 - 5.0 * right.x - 5.0 * up.x, (double)p.y - light.y * 50 - 5.0 * right.y - 5.0 * up.y, (double)p.z - 5.0 * right.z - 5.0 * up.z,
@@ -106,7 +113,7 @@ void Skybox::add_skybox(Window& window, Project &km, int &startSky, int &endSky)
         whiteColour, whiteColour, window, km.general);
 
 
-    //Moon and Sunspots based on imaginary pixels, distibuted across the celestial bodies from a pregenerated list of positions and sizes
+    //Moon and Sunspots based on imaginary pixels, distributed across the celestial bodies from a pregenerated list of positions and sizes
     for (int i = 0; i < 50; i++) {
         int size = moonSpotsList[i].s;
         int x = moonSpotsList[i].x;

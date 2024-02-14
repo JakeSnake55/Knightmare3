@@ -201,6 +201,12 @@
     <ClCompile Include="source\Window.cpp" />
     <ClCompile Include="source\World.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="eyeLogo.png" />
+    <Image Include="Resources\ml16x.png" />
+    <Image Include="Resources\ml32x.png" />
+    <Image Include="Resources\ml48x.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="packages\AllegroDeps.1.13.0\build\native\AllegroDeps.targets" Condition="Exists('packages\AllegroDeps.1.13.0\build\native\AllegroDeps.targets')" />

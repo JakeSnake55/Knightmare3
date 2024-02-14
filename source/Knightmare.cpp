@@ -473,7 +473,6 @@ int main(int argc, char** argv)
     ALLEGRO_EVENT_QUEUE* queue = window.queue;
     ALLEGRO_DISPLAY* display = window.display;
     ALLEGRO_MONITOR_INFO info;
-    ALLEGRO_BITMAP* image;
 
     
 
@@ -491,10 +490,11 @@ int main(int argc, char** argv)
     int display_width = info.x2 - info.x1;
     int display_height = info.y2 - info.y1;
     
+    ALLEGRO_BITMAP* icon[3] = { al_load_bitmap("Resources/ml16x.png"), al_load_bitmap("Resources/ml32x.png"),
+                                al_load_bitmap("Resources/ml48x.png")};
 
-    image = al_load_bitmap("eyeLogo.png");
-    if (image)
-        al_set_display_icons(display, 1, &image);
+    if (icon)
+        al_set_display_icons(display, 1, icon);
 
     //printf("%d\n", al_get_num_video_adapters());
 
