@@ -1,15 +1,16 @@
 #pragma once
 #pragma once 
-#include <allegro5/timer.h>
+#include <ctime>
 
 namespace timehandler
 {
+	extern bool fastmode;
 	extern int tickRate;
 	extern double elapsedTime;
-	extern double deltaTime;
+	extern clock_t deltaTime;
 	extern int unlinkedTime;
 	extern unsigned int day;
-	extern float framesPerSecond;
+	extern int clockTicks;
 	void changeTime();
 }
 

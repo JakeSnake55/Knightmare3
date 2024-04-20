@@ -437,13 +437,15 @@ static void handle_input(Window &window)
         mouseSleepUpdate = true;
     }
     if (io.KeysDown[ALLEGRO_KEY_F]) {
-        timehandler::tickRate = -1;
+        timehandler::fastmode = true;
     }
     if (io.KeysDown[ALLEGRO_KEY_O]) {
         timehandler::tickRate = 60;
+        timehandler::fastmode = false;
     }
     if (io.KeysDown[ALLEGRO_KEY_I]) {
         timehandler::tickRate = 20;
+        timehandler::fastmode = false;
     }
 
     playerMotion(x, y, z, window);
@@ -478,7 +480,7 @@ int main(int argc, char** argv)
 
     time(&timed);
     bool redraw = true;
-    int fps = 60;
+
     //al_set_new_display_adapter(al_get_num_video_adapters() - 1);
 
     //initializeScenes();
@@ -490,24 +492,21 @@ int main(int argc, char** argv)
     int display_width = info.x2 - info.x1;
     int display_height = info.y2 - info.y1;
     
-    ALLEGRO_BITMAP* icon[3] = { al_load_bitmap("Resources/ml16x.png"), al_load_bitmap("Resources/ml32x.png"),
-                                al_load_bitmap("Resources/ml48x.png")};
+    ALLEGRO_BITMAP* icon[3] = { al_load_bitmap("Resources/ml48x.png"), al_load_bitmap("Resources/ml32x.png"),
+                                al_load_bitmap("Resources/ml16x.png")};
 
     if (icon)
         al_set_display_icons(display, 1, icon);
 
     //printf("%d\n", al_get_num_video_adapters());
 
-    timer = al_create_timer(1.0 / (double)fps);
+    timer = al_create_timer(1.0 / (double)timehandler::tickRate);
    
 
     al_register_event_source(queue, al_get_timer_event_source(timer));
     setup_scene(window);
     al_start_timer(timer);
 
-
-   
-   
 
     while (true) {
         timehandler::changeTime();
@@ -542,9 +541,7 @@ int main(int argc, char** argv)
                 int i;
                 if (window.settings.keyboardSleep)
                     handle_input(window);
-                else {
-                    
-                }
+              
                 redraw = true;
 
                 /* Reset keyboard state for keys not held down anymore. */

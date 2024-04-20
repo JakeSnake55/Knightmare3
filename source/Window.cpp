@@ -12,40 +12,86 @@
 #include "World.h"
 #include "Files.h"
 #include "Defs.h"
+#include "timeHandler.h"
 
 
 
-Window::Window() 
+Window::Window()
 {
-    world.resize(0);
-    installs();
-    createWindow();
-    createEventQueue();
-    setupImgui();
-    file.loadWorldFolder(world);
-    for (int i = 0; i < ImGuiCol_COUNT; i++) {
-        StyleColors[i] = ImGui::GetStyleColorVec4(i);
-    }
+  world.resize(0);
+  installs();
+  createWindow();
+  createEventQueue();
+  setupImgui();
+  file.loadWorldFolder(world);
+  for (int i = 0; i < ImGuiCol_COUNT; i++) {
+    StyleColors[i] = ImGui::GetStyleColorVec4(i);
+  }
+}
+
+void Window::addStyles() {
+  for (int i = 0; i < ImGuiCol_COUNT; i++) {
+    ImGui::PushStyleColor(i, StyleColors[i]);
+  }
+}
+
+static void popStyles() {
+  ImGui::PopStyleColor(ImGuiCol_COUNT);
 }
 
 //Builds the Debug window for developer use only
 void Window::buildDebugWindow()
 {
-    ImGui::Begin("Debug");
+  addStyles();
+  ImGui::Begin("Debug");
 
-    ImGui::Checkbox("Demo Window", &settings.showDemoWindow);//Shows what is possible with ImGui
-    ImGui::Checkbox("VSync", &settings.waitForVSync);//Pauses frames to achieve VSync
-    ImGui::Checkbox("WireFrame mode", &settings.wireFrame);
-    ImGui::Checkbox("Draw Terrain", &settings.drawTerrain);
-    ImGui::Checkbox("Redraw Chunks", &settings.redrawChunks);
-    ImGui::Checkbox("Draw Sky", &settings.drawSkybox);
-    ImGui::Checkbox("Activate Camera", &settings.turnCamera);
-    ImGui::Checkbox("Activate Keyboard", &settings.keyboardSleep);
-    ImGui::SliderFloat("FOV", &settings.FOV,0,ALLEGRO_PI,"%.3f");
-    ImGui::SliderFloat("Zoom", &settings.zoom, 0, 10, "%.3f");
-    
-    
-    ImGui::End();//end a ImGui definition like this always
+  {
+    static int frameTimes[100] = {};
+    static size_t point = 0;
+    frameTimes[point] = timehandler::clockTicks;
+    point = (point + 1) % 100;
+
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    static float thickness = 3.0f;
+
+
+    const ImVec2 p = ImGui::GetCursorScreenPos();
+   
+    const float spacing = 10.0f;
+
+    float x = p.x + 4.0f;
+    float y = p.y + 80.0f;
+
+    for (int i = 0; i < 100; i++) {
+      ImU32 col = ImColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+      if (i == point-1) {
+        col = ImColor(ImVec4(0.4f, 1.0f, 0.4f, 1.0f));
+      }
+      float sz = (float)frameTimes[i];
+      draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x + thickness, y - sz), col);
+      x += thickness;// Vertical line (faster than AddLine, but only handle integer thickness)
+    }
+
+
+    ImGui::Dummy(ImVec2((spacing) * 10.2f, (spacing) * 1.0f+80.0f));
+  }
+
+  ImGui::Text("Clock Cycles: %d Clocks, %f Seconds", timehandler::clockTicks, (float)(timehandler::clockTicks) / (float)(CLOCKS_PER_SEC));
+
+  ImGui::Checkbox("Demo Window", &settings.showDemoWindow);//Shows what is possible with ImGui
+  ImGui::Checkbox("VSync", &settings.waitForVSync);//Pauses frames to achieve VSync
+  ImGui::Checkbox("WireFrame mode", &settings.wireFrame);
+  ImGui::Checkbox("Draw Terrain", &settings.drawTerrain);
+  ImGui::Checkbox("Redraw Chunks", &settings.redrawChunks);
+  ImGui::Checkbox("Draw Sky", &settings.drawSkybox);
+  ImGui::Checkbox("Activate Camera", &settings.turnCamera);
+  ImGui::Checkbox("Activate Keyboard", &settings.keyboardSleep);
+  ImGui::SliderFloat("FOV", &settings.FOV, 0, ALLEGRO_PI, "%.3f");
+  ImGui::SliderFloat("Zoom", &settings.zoom, 0, 10, "%.3f");
+
+
+  ImGui::End();//end a ImGui definition like this always
+  popStyles();
 }
 
 std::string append_number(std::string const& x, unsigned int num, char sep = '_') {
@@ -54,141 +100,132 @@ std::string append_number(std::string const& x, unsigned int num, char sep = '_'
   return s.str();
 }//util for label names
 
-void Window::addStyles() {
-    for (int i = 0; i < ImGuiCol_COUNT; i++) {
-        ImGui::PushStyleColor(i, StyleColors[i]);
-    }
-}
 
-static void popStyles() {
-    ImGui::PopStyleColor(ImGuiCol_COUNT);
-}
-
-void Window::buildMainMenu() 
+void Window::buildMainMenu()
 {
-    addStyles();
-    static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus;
+  addStyles();
+  static ImGuiWindowFlags flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus;
 
-    // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
-    // Based on your use case you may want one or the other.
-    const ImGuiViewport* viewport = ImGui::GetMainViewport();
-    ImGui::SetNextWindowPos( viewport->Pos);
-    ImGui::SetNextWindowSize(viewport->Size);
+  // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
+  // Based on your use case you may want one or the other.
+  const ImGuiViewport* viewport = ImGui::GetMainViewport();
+  ImGui::SetNextWindowPos(viewport->Pos);
+  ImGui::SetNextWindowSize(viewport->Size);
 
-    if (ImGui::Begin("Main Menu", NULL, flags))
+  if (ImGui::Begin("Main Menu", NULL, flags))
+  {
+    bool NewWorldButton = false;
+
+    //set a bool to process event at end of function
+    if (ImGui::Button("New World"))
     {
-        bool NewWorldButton = false;
-
-        //set a bool to process event at end of function
-        if (ImGui::Button("New World"))
-        {
-            NewWorldButton = true;
-        }
-        ImGui::SameLine();
-        ImGui::BeginDisabled(world.size() == 0);
-        ImGui::Button("Copy World");
-        ImGui::EndDisabled();
-        ImGui::SameLine(ImGui::GetWindowWidth()-65);
-        if (ImGui::Button("Options")) {
-            settings.showOptionsMenu = true;
-        }
-
-        // Left
-        static int selected = 0;
-        {
-            ImGui::BeginChild("left pane", ImVec2(157, al_get_display_height(display)-40), true, ImGuiWindowFlags_NoScrollbar);
-            for (int i = 0; i < world.size(); i++) 
-            {
-                if (ImGui::Selectable(world[i].name.c_str(), selected == i))
-                    selected = i;
-            }
-            ImGui::EndChild();
-        }
-        ImGui::SameLine();
-
-        // Right
-        if(world.size()>0){
-            ImGui::BeginGroup();
-            ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
-            ImGui::Text(world[selected].name.c_str());
-            ImGui::Separator();
-            if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
-            {
-                if (ImGui::BeginTabItem("Description"))
-                {
-                    if (ImGui::Button("Play")) 
-                    {
-                        settings.turnCamera = true;
-                        settings.currentId = selected;
-                        settings.showMainMenu = false;
-                        settings.drawTerrain = true;
-                        settings.drawSkybox = true;
-                        settings.keyboardSleep = true;
-                        settings.drawNewSkybox = true;
-                    }
-                    ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ");
-                    ImGui::EndTabItem();
-                }
-                if (ImGui::BeginTabItem("Details"))
-                {
-                    ImGui::Text("SEED: %d",world[selected].seed);
-                    ImGui::EndTabItem();
-                }
-                ImGui::EndTabBar();
-            }
-            ImGui::EndChild();
-
-            ImGui::EndGroup();
-        }
-
-        //Process button presses at end
-        if (NewWorldButton) {
-            settings.showMainMenu = false;
-            settings.makeNewWorld = true;
-            World w;
-            world.insert(world.begin(), w);
-            NewWorldButton = false;
-        }
-
-        ImGui::End();
+      NewWorldButton = true;
     }
-    popStyles();
+    ImGui::SameLine();
+    ImGui::BeginDisabled(world.size() == 0);
+    ImGui::Button("Copy World");
+    ImGui::EndDisabled();
+    ImGui::SameLine(ImGui::GetWindowWidth() - 65);
+    if (ImGui::Button("Options")) {
+      settings.showOptionsMenu = true;
+    }
+
+    // Left
+    static int selected = 0;
+    {
+      ImGui::BeginChild("left pane", ImVec2(157, al_get_display_height(display) - 40), true, ImGuiWindowFlags_NoScrollbar);
+      for (int i = 0; i < world.size(); i++)
+      {
+        if (ImGui::Selectable(world[i].name.c_str(), selected == i))
+          selected = i;
+      }
+      ImGui::EndChild();
+    }
+    ImGui::SameLine();
+
+    // Right
+    if (world.size() > 0) {
+      ImGui::BeginGroup();
+      ImGui::BeginChild("item view", ImVec2(0, -ImGui::GetFrameHeightWithSpacing())); // Leave room for 1 line below us
+      ImGui::Text(world[selected].name.c_str());
+      ImGui::Separator();
+      if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
+      {
+        if (ImGui::BeginTabItem("Description"))
+        {
+          if (ImGui::Button("Play"))
+          {
+            settings.turnCamera = true;
+            settings.currentId = selected;
+            settings.showMainMenu = false;
+            settings.drawTerrain = true;
+            settings.drawSkybox = true;
+            settings.keyboardSleep = true;
+            settings.drawNewSkybox = true;
+          }
+          ImGui::TextWrapped("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ");
+          ImGui::EndTabItem();
+        }
+        if (ImGui::BeginTabItem("Details"))
+        {
+          ImGui::Text("SEED: %d", world[selected].seed);
+          ImGui::EndTabItem();
+        }
+        ImGui::EndTabBar();
+      }
+      ImGui::EndChild();
+
+      ImGui::EndGroup();
+    }
+
+    //Process button presses at end
+    if (NewWorldButton) {
+      settings.showMainMenu = false;
+      settings.makeNewWorld = true;
+      World w;
+      world.insert(world.begin(), w);
+      NewWorldButton = false;
+    }
+
+    ImGui::End();
+  }
+  popStyles();
 
 }
 
 void Window::buildOptionMenu()
 {
 
-    static ImGuiWindowFlags flags =  NULL ;
+  static ImGuiWindowFlags flags = NULL;
 
-    // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
-    // Based on your use case you may want one or the other.
+  // We demonstrate using the full viewport area or the work area (without menu-bars, task-bars etc.)
+  // Based on your use case you may want one or the other.
 
-    addStyles();
+  addStyles();
 
-    if (ImGui::Begin("Option Menu", NULL, flags))
+  if (ImGui::Begin("Option Menu", NULL, flags))
+  {
+    if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
     {
-        if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
-        {
-            if (ImGui::BeginTabItem("Colours")) {
-                for (int i = 0; i < ImGuiCol_COUNT; i++) {
-                    ImGui::ColorEdit4(ImGui::GetStyleColorName(i), (float*)&StyleColors[i]);
-                }
-                ImGui::EndTabItem();
-            }
-            
-
-            if (ImGui::BeginTabItem("Misc")) {
-                
-                ImGui::EndTabItem();
-            }
-            ImGui::EndTabBar();
+      if (ImGui::BeginTabItem("Colours")) {
+        for (int i = 0; i < ImGuiCol_COUNT; i++) {
+          ImGui::ColorEdit4(ImGui::GetStyleColorName(i), (float*)&StyleColors[i]);
         }
+        ImGui::EndTabItem();
+      }
 
-        ImGui::End();
+
+      if (ImGui::BeginTabItem("Misc")) {
+
+        ImGui::EndTabItem();
+      }
+      ImGui::EndTabBar();
     }
 
-    popStyles();
+    ImGui::End();
+  }
+
+  popStyles();
 }
 
 void Window::buildWorldCreationMenu(int id) {
@@ -204,26 +241,26 @@ void Window::buildWorldCreationMenu(int id) {
   if (ImGui::Begin("World Menu", NULL, flags))
   {
     const int worldNameLength = 120;
-    char temp[worldNameLength] ;
+    char temp[worldNameLength];
     strcpy_s(temp, world[id].name.c_str());
     ImGui::InputTextWithHint("##world_name", "World name", temp, worldNameLength);
     ImGui::Text("Seed");
     ImGui::SameLine();
     ImGui::InputInt("##world_seed", &world[id].seed);
-    
+
     world[id].name = temp;
 
     if (&settings.makeNewWorld && ImGui::Button("Create world")) {
-        if (!(world[id].name.size() == 0))
-        {
-            file.addWorldFolder(world[id]);
-        }
-        else 
-        {
-            world.erase(world.begin());
-            world.resize(world.size() - 1);
-        }
-      
+      if (!(world[id].name.size() == 0))
+      {
+        file.addWorldFolder(world[id]);
+      }
+      else
+      {
+        world.erase(world.begin());
+        world.resize(world.size() - 1);
+      }
+
       settings.makeNewWorld = false;
       settings.currentId = -1;
       settings.showMainMenu = true;
@@ -236,88 +273,90 @@ void Window::buildWorldCreationMenu(int id) {
 
 void Window::installs()
 {
-    if (!al_init())
-        std::exit(1);
-    al_install_keyboard();
-    al_install_mouse();
-    al_init_primitives_addon();
-    al_init_font_addon();
-    al_init_image_addon();
+  if (!al_init())
+    std::exit(1);
+  al_install_keyboard();
+  al_install_mouse();
+  al_init_primitives_addon();
+  al_init_font_addon();
+  al_init_image_addon();
 
 #ifndef IMGUI_VERSION
-    std::exit(2);
+  std::exit(2);
 #endif // !IMGUI_VERSION
 }
 
 
-void Window::createWindow() 
+void Window::createWindow()
 {
 
-    al_set_new_display_flags(ALLEGRO_RESIZABLE);
-    display = al_create_display(1280, 720);
-    al_set_window_title(display, "Knightmare 3.0");
+  al_set_new_display_flags(ALLEGRO_RESIZABLE);
+  display = al_create_display(1280, 720);
+  al_set_window_title(display, "Knightmare 3.0");
 }
 
-void Window::createEventQueue() 
+void Window::createEventQueue()
 {
-    //double FPS = 60.0;
-    queue = al_create_event_queue();
-    al_register_event_source(queue, al_get_display_event_source(display));
-    al_register_event_source(queue, al_get_keyboard_event_source());
-    al_register_event_source(queue, al_get_mouse_event_source());
+  //double FPS = 60.0;
+  queue = al_create_event_queue();
+  al_register_event_source(queue, al_get_display_event_source(display));
+  al_register_event_source(queue, al_get_keyboard_event_source());
+  al_register_event_source(queue, al_get_mouse_event_source());
 }
 
-void Window::setupImgui() 
+void Window::setupImgui()
 {
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO(); (void)io;
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-    //ImGui::StyleColorsLight();
-    
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+  //ImGui::StyleColorsLight();
 
-    // Setup Platform/Renderer backends
-    ImGui_ImplAllegro5_Init(display);
 
-    // Load Fonts
-    // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-    // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-    // - If the file cannot be loaded, the function will return a nullptr. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-    // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-    // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
-    // - Read 'docs/FONTS.md' for more instructions and details.
-    // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-    //io.Fonts->AddFontDefault();
-    //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-    //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-    //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
-    //IM_ASSERT(font != nullptr);
-  
+  // Setup Platform/Renderer backends
+  ImGui_ImplAllegro5_Init(display);
+
+  // Load Fonts
+  // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
+  // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
+  // - If the file cannot be loaded, the function will return a nullptr. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
+  // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
+  // - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
+  // - Read 'docs/FONTS.md' for more instructions and details.
+  // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
+  //io.Fonts->AddFontDefault();
+  //io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
+  //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
+  //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
+  //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
+  //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+  //IM_ASSERT(font != nullptr);
+
 }
 
-void Window::cleanExit() 
+void Window::cleanExit()
 {
-    ImGui_ImplAllegro5_Shutdown();
-    ImGui::DestroyContext();
-    al_destroy_event_queue(queue);
-    al_destroy_display(display);
+  ImGui_ImplAllegro5_Shutdown();
+  ImGui::DestroyContext();
+  al_destroy_event_queue(queue);
+  al_destroy_display(display);
 }
 
-bool Window::getEvent() 
+bool Window::getEvent()
 {
-    return al_get_next_event(queue, &event);
+  return al_get_next_event(queue, &event);
 }
 
 void Window::render()
 {
-    ImGui::Render(); //needed to avoid crash, dunno what it does
-    ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
-    al_flip_display();
-    
+  ImGui::Render(); //needed to avoid crash, dunno what it does
+  ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
+  if (settings.waitForVSync)
+    al_wait_for_vsync();
+  al_flip_display();
+
 }
