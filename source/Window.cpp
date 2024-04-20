@@ -203,8 +203,9 @@ void Window::buildOptionMenu()
 
   addStyles();
 
-  if (ImGui::Begin("Option Menu", NULL, flags))
-  {
+  ImGui::Begin("Option Menu", NULL, flags);
+  
+
     if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
     {
       if (ImGui::BeginTabItem("Colours")) {
@@ -214,8 +215,11 @@ void Window::buildOptionMenu()
         ImGui::EndTabItem();
       }
 
-
       if (ImGui::BeginTabItem("Misc")) {
+
+        if (&settings.showOptionsMenu && ImGui::Button("Close Options")) {
+          settings.showOptionsMenu = false;
+        }
 
         ImGui::EndTabItem();
       }
@@ -223,7 +227,7 @@ void Window::buildOptionMenu()
     }
 
     ImGui::End();
-  }
+  
 
   popStyles();
 }
