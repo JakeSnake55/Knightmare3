@@ -83,141 +83,6 @@ static void chunk_generator(int chunkX = 0, int chunkY = 0, int chunkZ = 0)
     }
 }
 
-/* Create a 16x16x16 chunk made from vertex faces. Would like to implement Greedy Meshing here in the future. */
-static void draw_chunk(Window &window, int x0 = 0, int y0 = 0, int z0 = 0)
-{
-    drawTerrain = true;
-    bool fullCube = true;
-    bool nullCube = false;
-    for (int x = 0; x < 16; x++) {
-        for (int y = 0; y < 16; y++) {
-            for (int z = 0; z < 16; z++) {
-                if (generated[x][y][z].material == NOBLOCK) {
-                    fullCube = false;
-                }
-                if (generated[x][y][z].material != NOBLOCK) {
-                    nullCube = false;
-                }
-            }
-        }
-    }
-    if (fullCube) {
-        ALLEGRO_COLOR COLOR = al_map_rgba_f(generated[0][0][0].colour.r * 0.98f, generated[0][0][0].colour.g * 0.98f, generated[0][0][0].colour.b * 0.98f, generated[0][0][0].colour.a);
-        add_quad((double)x0 * 16, (double)z0 * 16, (double)y0 * 16,
-            0, 0, 16,
-            0, 16, 0,
-            COLOR, COLOR, window, generatedChunkArray[x0][y0][z0]);
-
-
-        add_quad(16 + (double)x0 * 16, (double)z0 * 16, (double)y0 * 16,
-            0, 0, 16,
-            0, 16, 0,
-            COLOR, COLOR, window, generatedChunkArray[x0][y0][z0]);
-
-        COLOR = al_map_rgba_f(generated[0][0][0].colour.r * 0.94f, generated[0][0][0].colour.g * 0.94f, generated[0][0][0].colour.b * 0.94f, generated[0][0][0].colour.a);
-
-        add_quad((double)x0 * 16, (double)z0 * 16, (double)y0 * 16,
-            16, 0, 0,
-            0, 16, 0,
-            COLOR, COLOR, window, generatedChunkArray[x0][y0][z0]);
-
-
-        add_quad((double)x0 * 16, (double)z0 * 16, 16 + (double)y0 * 16,
-            16, 0, 0,
-            0, 16, 0,
-            COLOR, COLOR, window, generatedChunkArray[x0][y0][z0]);
-
-        COLOR = al_map_rgba_f(generated[0][0][0].colour.r * 0.90f, generated[0][0][0].colour.g * 0.90f, generated[0][0][0].colour.b * 0.90f, generated[0][0][0].colour.a);
-
-
-        add_quad((double)x0 * 16, (double)z0 * 16, (double)y0 * 16,
-            16, 0, 0,
-            0, 0, 16,
-            COLOR, COLOR, window, generatedChunkArray[x0][y0][z0]);
-
-
-        add_quad((double)x0 * 16, 16 + (double)z0 * 16, (double)y0 * 16,
-            16, 0, 0,
-            0, 0, 16,
-            COLOR, COLOR, window, generatedChunkArray[x0][y0][z0]);
-        return;
-    }
-    if (nullCube) {
-        return;
-    }
-    for (int x = 0; x < 16; x++) {
-        for (int y = 0; y < 16; y++) {
-            for (int z = 0; z < 16; z++) {
-                if (generated[x][y][z].material != NOBLOCK) {
-                    ALLEGRO_COLOR COLOR = al_map_rgba_f(generated[x][y][z].colour.r * 0.98f, generated[x][y][z].colour.g * 0.98f, generated[x][y][z].colour.b * 0.98f, generated[x][y][z].colour.a);
-                    if ((x == 0) || (generated[x - 1][y][z].material == NOBLOCK)) {
-                        add_quad(x + (double)x0 * 16, z + (double)z0 * 16, y + (double)y0 * 16,
-                            0, 0, 1,
-                            0, 1, 0,
-                            COLOR, COLOR, window, generatedChunkArray[x0][y0][z0]);
-                    }
-                    if ((x == 15) || (generated[x + 1][y][z].material == NOBLOCK)) {
-                        add_quad(x + 1 + (double)x0 * 16, z + (double)z0 * 16, y + (double)y0 * 16,
-                            0, 0, 1,
-                            0, 1, 0,
-                            COLOR, COLOR, window, generatedChunkArray[x0][y0][z0]);
-                    }
-                    COLOR = al_map_rgba_f(generated[x][y][z].colour.r * 0.94f, generated[x][y][z].colour.g * 0.94f, generated[x][y][z].colour.b * 0.94f, generated[x][y][z].colour.a);
-                    if ((y == 0) || (generated[x][y - 1][z].material == NOBLOCK)) {
-                        add_quad(x + (double)x0 * 16, z + (double)z0 * 16, y + (double)y0 * 16,
-                            1, 0, 0,
-                            0, 1, 0,
-                            COLOR, COLOR, window, generatedChunkArray[x0][y0][z0]);
-                    }
-                    if ((y == 15) || (generated[x][y + 1][z].material == NOBLOCK)) {
-                        add_quad((double)x + x0 * 16, (double)z + z0 * 16, (double)y + 1 + y0 * 16,
-                            1, 0, 0,
-                            0, 1, 0,
-                            COLOR, COLOR, window, generatedChunkArray[x0][y0][z0]);
-                    }
-                    COLOR = al_map_rgba_f(generated[x][y][z].colour.r * 0.90f, generated[x][y][z].colour.g * 0.90f, generated[x][y][z].colour.b * 0.90f, generated[x][y][z].colour.a);
-
-                    if ((z == 0) || (generated[x][y][z - 1].material == NOBLOCK)) {
-                        add_quad((double)x + x0 * 16, (double)z + z0 * 16, (double)y + y0 * 16,
-                            1, 0, 0,
-                            0, 0, 1,
-                            COLOR, COLOR, window, generatedChunkArray[x0][y0][z0]);
-                    }
-                    if ((z == 15) || (generated[x][y][z + 1].material == NOBLOCK)) {
-                        add_quad((double)x + x0 * 16, (double)z + 1 + z0 * 16, (double)y + y0 * 16,
-                            1, 0, 0,
-                            0, 0, 1,
-                            COLOR, COLOR, window, generatedChunkArray[x0][y0][z0]);
-                    }
-                }
-            }
-        }
-    }
-    drawTerrain = false;
-}
-
-
-
-static void buildChunks(Window &window) {
-    int width = 8;
-    chunkX = floor(km.camera.position.x / 16.0);
-    chunkY = floor(km.camera.position.z / 16.0);
-    chunkZ = floor(km.camera.position.y / 16.0);
-    loadedChunks = {};
-    bool exit = false;
-    for (int i = -4; i < 0; i++) {
-        for (int j = -4; j < 0; j++) {
-            for (int d = -4; d < 0; d++) {
-                if (true) {
-                    chunk_generator(i + chunkX, j + chunkY, d + chunkZ);
-                    draw_chunk(window, i + chunkX, j + chunkY, d + chunkZ);
-                    exit = true;
-                    
-                }
-            }
-        }
-    }
-}
 
 
 
@@ -225,7 +90,7 @@ static void draw_scene(Window &window)
 {
     
     if (window.settings.redrawChunks) {
-        buildChunks(window);
+   
         window.settings.redrawChunks = false;
     }
     if (window.settings.drawNewSkybox) {
@@ -494,6 +359,8 @@ int main(int argc, char** argv)
     
     ALLEGRO_BITMAP* icon[3] = { al_load_bitmap("Resources/ml48x.png"), al_load_bitmap("Resources/ml32x.png"),
                                 al_load_bitmap("Resources/ml16x.png")};
+
+   
 
     if (icon)
         al_set_display_icons(display, 1, icon);

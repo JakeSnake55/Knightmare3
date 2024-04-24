@@ -10,7 +10,7 @@ Current features:
 	Perspectives from Allegro
 
 Work in Progress:
-	
+	Debug data
 	Main Menu system -Somewhat satisfied with worldlist, but selected world info is not yet complete
 
 Planned Features:
@@ -18,13 +18,13 @@ Planned Features:
 	UDP hole punching (or better) multiplayer (means no servers, just connect to friends)
  	Full Linux compatibility
   	Maybe some Mac testing
-   	A user friendly installer (maybe a makefile? (though that's only really friendly to programmers))
+  A user friendly installer (maybe a makefile? (though that's only really friendly to programmers))
 
- Known Issues:
- 	Window.cpp uses strcpy_s, which on linux appears unknown? maybe we can use strcpy instead?
-	 can be made plaform specific by definining strcpy_s as strcpy if _linux_ is defined
- 	Linux version has excessively sensitive camera movement, and mouse is not locked in position during mouse movement. 
-	 Solution found, mouse can't be moved whilst visible, hence on linux make sure mouse is invisible when camera can move
+Known Issues:
+	Linux version has strong flashes while skybox is drawn, Windows has flashing on transparent bits of ImGui's transparency.
+	Linux shows build_chunks() leads to a segmentation fault.
+	Linux shows something in removing the main menu to enter a map leads to a segmentation fault of some kind.
+	ValGrind makes me worried about memory leaks and possible issues. I want to root out all warnings, and possible issues.
 
 
 Error Codes:
