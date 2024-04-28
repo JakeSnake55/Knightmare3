@@ -6,6 +6,10 @@
 #include <allegro5/allegro_image.h>
 #include <math.h>
 
+#ifdef linux
+#define strcpy_s(x,y) strcpy(x,y)
+#endif
+
 
 #define pi ALLEGRO_PI
 
