@@ -39,9 +39,6 @@
     <ClInclude Include="source\Projection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source\IMGUI\imconfig.h">
-      <Filter>Header Files\IMGUI</Filter>
-    </ClInclude>
     <ClInclude Include="source\IMGUI\imgui.h">
       <Filter>Header Files\IMGUI</Filter>
     </ClInclude>
@@ -86,6 +83,9 @@
     </ClInclude>
     <ClInclude Include="source\DrawCalls.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="source\IMGUI\imconfig.h">
+      <Filter>Header Files\IMGUI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

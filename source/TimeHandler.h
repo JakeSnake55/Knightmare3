@@ -10,6 +10,7 @@ namespace timehandler
 	extern clock_t deltaTime;
 	extern int unlinkedTime;
 	extern unsigned int day;
+	extern double dayLength;
 	extern int clockTicks;
 	void changeTime();
 }

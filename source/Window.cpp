@@ -30,6 +30,7 @@ Window::Window()
 }
 
 void Window::addStyles() {
+
   for (int i = 0; i < ImGuiCol_COUNT; i++) {
     ImGui::PushStyleColor(i, StyleColors[i]);
   }
@@ -39,13 +40,22 @@ static void popStyles() {
   ImGui::PopStyleColor(ImGuiCol_COUNT);
 }
 
+void clockOut(int value, std::string prefix) {
+  ImGui::Text((prefix+"Clock Cycles: %d Clocks, %f Seconds, %d FPS").c_str(), value, (float)(value) / (float)(CLOCKS_PER_SEC), (value == 0) ? -1 : (int)((float)(CLOCKS_PER_SEC) / (float)(value)));
+}
+
 //Builds the Debug window for developer use only
 void Window::buildDebugWindow()
 {
   addStyles();
   ImGui::Begin("Debug");
 
+ 
+
   {
+    int max = 0;
+    int min = 999999;
+    int total = 0;
     static int frameTimes[100] = {};
     static size_t point = 0;
     frameTimes[point] = timehandler::clockTicks;
@@ -63,20 +73,38 @@ void Window::buildDebugWindow()
     float y = p.y + 80.0f;
 
     for (int i = 0; i < 100; i++) {
+      int currTime = frameTimes[i];
+      float sz = (float)currTime;
+      total += currTime;
       ImU32 col = ImColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
       if (i == point-1) {
-        col = ImColor(ImVec4(0.4f, 1.0f, 0.4f, 1.0f));
+        draw_list->AddRectFilled(ImVec2(x, y-80), ImVec2(x + thickness, y-sz), ImColor(ImVec4(0.4f, 1.0f, 0.4f, 1.0f)));
       }
-      float sz = (float)frameTimes[i];
+     
+      
+      //Max and Min getting found and kept for info
+      if (currTime > max) 
+      {
+        col = ImColor(ImVec4(0.4f, 0.4f, 1.0f, 1.0f));
+        max = currTime;
+      }
+      if (currTime < min) {
+        col = ImColor(ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
+        min = currTime;
+      }
+      
       draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x + thickness, y - sz), col);
       x += thickness;// Vertical line (faster than AddLine, but only handle integer thickness)
     }
 
-
     ImGui::Dummy(ImVec2((spacing) * 10.2f, (spacing) * 1.0f+80.0f));
+    clockOut(timehandler::clockTicks,"");
+    clockOut(max,"Max ");
+    clockOut(min, "Min ");
+    clockOut(total/100, "Avg ");
   }
 
-  ImGui::Text("Clock Cycles: %d Clocks, %f Seconds", timehandler::clockTicks, (float)(timehandler::clockTicks) / (float)(CLOCKS_PER_SEC));
+ 
 
   ImGui::Checkbox("Demo Window", &settings.showDemoWindow);//Shows what is possible with ImGui
   ImGui::Checkbox("VSync", &settings.waitForVSync);//Pauses frames to achieve VSync
@@ -293,7 +321,7 @@ void Window::installs()
 
 void Window::createWindow()
 {
-
+  al_set_new_display_flags(ALLEGRO_VSYNC);
   al_set_new_display_flags(ALLEGRO_RESIZABLE);
   display = al_create_display(1280, 720);
   al_set_window_title(display, "Knightmare 3.0");

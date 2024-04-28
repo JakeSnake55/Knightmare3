@@ -2,7 +2,6 @@
 #include <allegro5/allegro5.h>
 #include <ctime>
 
-int offset = 0;
 int timePerSecond = 1;
 
 
@@ -20,31 +19,26 @@ namespace timehandler {
 	void changeTime() {
 		
 		clock_t currentTime = clock();
-		elapsedTime = (float)(currentTime)/CLOCKS_PER_SEC - offset;
-		/*Unlimited Framerate Strange behaviour now*/
+		elapsedTime = (float)(currentTime)/CLOCKS_PER_SEC - (double)day*dayLength;
+		/*Unlimited Speed*/
 		if (fastmode) {
 			unlinkedTime++;
 			if ((elapsedTime + unlinkedTime) >= (double)dayLength) {
 				unlinkedTime -= dayLength;
 				day++;
 			}
-			//Measure FPS with time intervals between executions
-			clockTicks =  (currentTime - deltaTime);
-			deltaTime = currentTime;
 		}
 
 		else {
-			/*Limited Framerate (Usually like 60/second or 20/second)*/
+			/*Limited Speed (Usually like 60/second or 20/second)*/
 			if ((currentTime - deltaTime) >= (((float)CLOCKS_PER_SEC)/tickRate)) {
-
 				if ((elapsedTime + unlinkedTime) >= (double)dayLength) {
-					offset += dayLength;
 					day++;
 				}
-				//Measure FPS with time intervals between executions
-				clockTicks = (currentTime-deltaTime);
-				deltaTime = currentTime;
 			}
 		}
+		//Measure Clocks between cycles with clock intervals between executions
+		clockTicks = (currentTime - deltaTime);
+		deltaTime = currentTime;
 	}
 }
