@@ -86,16 +86,16 @@ static void chunk_generator(int chunkX = 0, int chunkY = 0, int chunkZ = 0)
 
 
 
-static void draw_scene(Window &window)
+static void draw_scene(Window& window)
 {
-    
-    if (window.settings.redrawChunks) {
-   
-        window.settings.redrawChunks = false;
-    }
-    if (window.settings.drawNewSkybox) {
-        sky.loadSeed(window.world[window.settings.currentId].seed);
-    }
+  ImGui_ImplAllegro5_NewFrame();
+  if (window.settings.redrawChunks) {
+
+    window.settings.redrawChunks = false;
+  }
+  if (window.settings.drawNewSkybox) {
+    sky.loadSeed(window.world[window.settings.currentId].seed);
+  }
 
 
   Camera* c = &km.camera;
@@ -174,7 +174,7 @@ static void draw_scene(Window &window)
     }
   }
 
-  
+
   ImGui::NewFrame();
 
   if (window.settings.showOptionsMenu) {
@@ -313,7 +313,7 @@ static void handle_input(Window& window)
 
   playerMotion(x, y, z, window);
 }
-void initializeScenes() 
+void initializeScenes()
 {
 
   al_set_new_display_option(ALLEGRO_SAMPLE_BUFFERS, 1, ALLEGRO_SUGGEST);
@@ -329,7 +329,7 @@ void initializeScenes()
 
 int main(int argc, char** argv)
 {
-  
+
   Window window;
   ALLEGRO_TIMER* timer;
   ALLEGRO_EVENT_QUEUE* queue = window.queue;
@@ -343,9 +343,9 @@ int main(int argc, char** argv)
 
   //al_set_new_display_adapter(al_get_num_video_adapters() - 1);
 
- 
+
   al_get_monitor_info(al_get_num_video_adapters() - 1, &info);
- 
+
   int display_width = info.x2 - info.x1;
   int display_height = info.y2 - info.y1;
 
