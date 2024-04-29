@@ -83,7 +83,25 @@ static void chunk_generator(int chunkX = 0, int chunkY = 0, int chunkZ = 0)
   }
 }
 
+static void draw_windows(Window &window) {
+  if (window.settings.showOptionsMenu) {
+    window.buildOptionMenu();
+  }
+  if (window.settings.showMainMenu) {
+    window.buildMainMenu();
+  }
+  if (window.settings.makeNewWorld) {
+    window.buildWorldCreationMenu(window.settings.currentId);
+  }
+#ifdef DEBUG  //Only for Developers
+  window.buildDebugWindow();
 
+  if (window.settings.showDemoWindow) {
+    ImGui::ShowDemoWindow(&window.settings.showDemoWindow);
+  }
+#endif
+
+}
 
 
 static void draw_scene(Window& window)
@@ -110,24 +128,20 @@ static void draw_scene(Window& window)
   int th;
   double yaw, roll;
 
-
-
-
+  ImGui::NewFrame();//Must be before Imgui windows are drawn.
+  draw_windows(window);
+  ImGui::Render(); //Must end before primitives are drawn.
   setup_3d_projection(window.settings.FOV);
 
-  al_set_render_state(ALLEGRO_DEPTH_TEST, 0);
-
-  al_clear_depth_buffer(1);
-
-  al_clear_to_color(back);
 
   if (window.settings.drawSkybox)
   {
     startSky = km.general.n;
     sky.add_skybox(window, km, startSky, endSky);
   }
-
-
+  else {
+    al_clear_to_color(back);
+  }
 
   if (window.settings.drawSkybox || window.settings.drawTerrain) {
     al_build_camera_transform(&t,
@@ -138,7 +152,6 @@ static void draw_scene(Window& window)
       km.camera.yaxis.x, km.camera.yaxis.y, km.camera.yaxis.z);
     al_use_transform(&t);
   }
-
 
   if (window.settings.drawSkybox) {
     al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA);
@@ -151,11 +164,8 @@ static void draw_scene(Window& window)
     }
   }
 
-
   al_clear_depth_buffer(1);
   al_set_render_state(ALLEGRO_DEPTH_TEST, 1);
-
-
 
   if (window.settings.drawTerrain) {
 
@@ -173,27 +183,8 @@ static void draw_scene(Window& window)
       }
     }
   }
-
-
-  ImGui::NewFrame();
-
-  if (window.settings.showOptionsMenu) {
-    window.buildOptionMenu();
-  }
-
-  if (window.settings.showMainMenu) {
-    window.buildMainMenu();
-  }
-  if (window.settings.makeNewWorld) {
-    window.buildWorldCreationMenu(window.settings.currentId);
-  }
-#ifdef DEBUG  //Only for Developers
-  window.buildDebugWindow();
-
-  if (window.settings.showDemoWindow) {
-    ImGui::ShowDemoWindow(&window.settings.showDemoWindow);
-  }
-#endif
+ 
+  ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
   window.render();
 
 }

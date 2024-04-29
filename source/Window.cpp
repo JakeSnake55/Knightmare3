@@ -385,8 +385,6 @@ bool Window::getEvent()
 
 void Window::render()
 {
-  ImGui::Render(); //needed to avoid crash, dunno what it does
-  ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
   if (settings.waitForVSync)
     al_wait_for_vsync();
   al_flip_display();
