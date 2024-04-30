@@ -125,8 +125,6 @@ static void draw_scene(Window& window)
 
   ALLEGRO_COLOR front = al_color_name("white");
   ALLEGRO_COLOR back = al_map_rgba(0, 0, 0, 128);
-  int th;
-  double yaw, roll;
 
   ImGui::NewFrame();//Must be before Imgui windows are drawn.
   draw_windows(window);

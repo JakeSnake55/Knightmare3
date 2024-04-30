@@ -7,7 +7,7 @@
  */
 static double vector_dot_product(Vector a, Vector b)
 {
-    return a.x * b.x + a.y * b.y + a.z * b.z;
+  return (double)a.x * b.x + (double)a.y * b.y + (double)a.z * b.z;
 }
 
 /* Calculate the cross product of two vectors. This produces a normal to the
