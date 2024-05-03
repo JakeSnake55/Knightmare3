@@ -1,26 +1,31 @@
 #include <allegro5/allegro5.h>
+#include <iostream>
 #include "Defs.h"
 #include "Window.h"
 #include "DrawCalls.h"
 
 
-/* Adds a new vertex to our scene. */
+
 void add_vertex(double x, double y, double z,
     ALLEGRO_COLOR color, VoxelSet& vertexList)
 {
 
-    int i = vertexList.n++;
+    size_t i = vertexList.n++;
     if (i >= vertexList.v_size) {
-        if (vertexList.v_size > INT_MAX / 2) {
-            exit(3);
+        if (vertexList.v_size > ULONG_MAX / 2) {
+          std::cerr <<__FILE__<<" : "<<__LINE__ << " very large amount of vertices, dirty exit."<<std::endl;
+          exit(3);
         }
         vertexList.v_size += 1;
         vertexList.v_size *= 2;
+        
         ALLEGRO_VERTEX* tmp = (ALLEGRO_VERTEX*)realloc(vertexList.v, vertexList.v_size * sizeof * vertexList.v);
-        if (tmp != NULL) {
-
-            vertexList.v = tmp;
+        if (tmp == NULL) {
+          std::cerr << __FILE__ << " : " << __LINE__ << " realloc failed, dirty exit."<<std::endl;
+          exit(3);
         }
+       
+        vertexList.v = tmp;
     }
     vertexList.v[i].x = x;
     vertexList.v[i].y = y;
@@ -29,7 +34,10 @@ void add_vertex(double x, double y, double z,
 
 }
 
-/* Adds two triangles (6 vertices) to the scene. With gradient colours */
+/* Adds two triangles (6 vertices) to the scene. With gradient colour
+
+
+ */
 void add_quad(double x, double y, double z,
     double ux, double uy, double uz,
     double vx, double vy, double vz,

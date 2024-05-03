@@ -53,7 +53,7 @@ void Skybox::StarPositioner() {
         sunSpotsList[i].x = (11 - (sunSpotsList[i].s / 2)) * distribute(gen);
         sunSpotsList[i].y = (11 - (sunSpotsList[i].s / 2)) * distribute(gen);
     }
-    first = true;
+
 }
 
 
@@ -70,7 +70,7 @@ void Skybox::add_skybox(Window& window, Project &km, int &startSky, int &endSky)
 
     /* Rotations lookup
     */
-    float angle = (((float)2 * pi) / (float)1800) * (timehandler::elapsedTime + timehandler::unlinkedTime);
+    float angle = (((float)2 * pi) / (float)window.time.dayLength) * (window.time.elapsedTime + window.time.unlinkedTime);
     Vector light = { sin(angle),cos(angle),0 };
 
     Vector right = km.camera.xaxis;
@@ -84,20 +84,18 @@ void Skybox::add_skybox(Window& window, Project &km, int &startSky, int &endSky)
     /* Stars randomly distributed, no motion, should fade out near sun or moon*/
 
     for (int i = 0; i < starCount; i++) {
-
         float distance = sqrt((pow(starList[i].x / 50.0 + light.x, 2) + pow(starList[i].y / 50.0 - light.y, 2)) * 2.5f) - 1.5f;
-        if (first) {
-            float scale = starList[i].s;
-            add_quad((double)p.x - starList[i].x - right.x * scale / 2 - up.x * scale / 2, (double)p.y + starList[i].y - right.y * scale / 2 - up.x * scale / 2, (double)p.z - starList[i].z - right.z * scale / 2 - up.x * scale / 2,
-                (double)scale * right.x, (double)scale * right.y, (double)scale * right.z,
-                (double)scale * up.x, (double)scale * up.y, (double)scale * up.z,
-                al_map_rgba_f(1, 1, 1, distance), al_map_rgba_f(1, 1, 1, distance), window, km.general);
-        }
-        else {
-            km.general.v[i].color.a = distance;
-        }
+       
+        float scale = starList[i].s;
+        add_quad(
+          (double)p.x - starList[i].x - right.x * scale / 2 - up.x * scale / 2, 
+          (double)p.y + starList[i].y - right.y * scale / 2 - up.x * scale / 2, 
+          (double)p.z - starList[i].z - right.z * scale / 2 - up.x * scale / 2,
+          (double)scale * right.x, (double)scale * right.y, (double)scale * right.z,
+          (double)scale * up.x, (double)scale * up.y, (double)scale * up.z,
+          al_map_rgba_f(1, 1, 1, distance), al_map_rgba_f(1, 1, 1, distance), window, km.general);
+       
     }
-    first = false;
 
     // Moon 
     add_quad((double)p.x - (double)light.x * 50 - 5.0 * right.x - 5.0 * up.x, (double)p.y - (double)light.y * 50 - 5.0 * right.y - 5.0 * up.y, (double)p.z - 5.0 * right.z - 5.0 * up.z,

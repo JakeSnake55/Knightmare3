@@ -5,3 +5,5 @@
 #define DEBUG true
 
 #define SCALE 0.03
+
+#define DEBUGFRAMES 10000

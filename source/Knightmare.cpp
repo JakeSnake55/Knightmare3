@@ -289,15 +289,15 @@ static void handle_input(Window& window)
     mouseSleepUpdate = true;
   }
   if (io.KeysDown[ALLEGRO_KEY_F]) {
-    timehandler::fastmode = true;
+    window.time.fastmode = true;
   }
   if (io.KeysDown[ALLEGRO_KEY_O]) {
-    timehandler::tickRate = 60;
-    timehandler::fastmode = false;
+    window.time.tickRate = 60;
+    window.time.fastmode = false;
   }
   if (io.KeysDown[ALLEGRO_KEY_I]) {
-    timehandler::tickRate = 20;
-    timehandler::fastmode = false;
+    window.time.tickRate = 20;
+    window.time.fastmode = false;
   }
 
   playerMotion(x, y, z, window);
@@ -346,7 +346,7 @@ int main(int argc, char** argv)
 
   //printf("%d\n", al_get_num_video_adapters());
 
-  timer = al_create_timer(1.0 / al_get_display_refresh_rate(display));
+  timer = al_create_timer(1.0 / 60.0);
 
 
   al_register_event_source(queue, al_get_timer_event_source(timer));
@@ -355,7 +355,7 @@ int main(int argc, char** argv)
 
 
   while (true) {
-    timehandler::changeTime();
+    window.time.changeTime();
     if (al_peek_next_event(queue, &window.event)) {
       window.getEvent();
       ImGui_ImplAllegro5_ProcessEvent(&window.event);
@@ -426,7 +426,6 @@ int main(int argc, char** argv)
 
     if (redraw && al_is_event_queue_empty(queue)) {
       draw_scene(window);
-      window.render();
       redraw = false;
     }
   }

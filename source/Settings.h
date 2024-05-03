@@ -1,6 +1,5 @@
 #pragma once
 #include <allegro5/allegro5.h>
-#define DEBUG
 
 const int starCount = 100;
 const int spotsCount = 50;

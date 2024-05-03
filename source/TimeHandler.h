@@ -1,17 +1,22 @@
 #pragma once
-#pragma once 
 #include <ctime>
+#include "knightmare3config.h"
 
-namespace timehandler
-{
-	extern bool fastmode;
-	extern int tickRate;
-	extern double elapsedTime;
-	extern clock_t deltaTime;
-	extern int unlinkedTime;
-	extern unsigned int day;
-	extern double dayLength;
-	extern int clockTicks;
+struct TimeHandler{
+	bool fastmode;
+	int tickRate;
+	double elapsedTime;
+	clock_t deltaTime;
+	int unlinkedTime;
+	unsigned int day;
+	double dayLength;
+	int clockTicks;
+	TimeHandler();
 	void changeTime();
-}
+	void fillArray();
+
+	int frameTimes[DEBUGFRAMES] = {};
+	size_t point = 0;
+	
+};
 

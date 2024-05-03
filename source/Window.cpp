@@ -4,10 +4,12 @@
 #include <allegro5/allegro_primitives.h>
 #include <string.h>
 #include <sstream>
+#include <iostream>
 
 #include "IMGUI/imgui_internal.h"
 #include "IMGUI/imgui.h"
 #include "IMGUI/imgui_impl_allegro5.h"
+#include "knightmare3config.h"
 #include "Settings.h"
 #include "World.h"
 #include "Files.h"
@@ -50,16 +52,10 @@ void Window::buildDebugWindow()
   addStyles();
   ImGui::Begin("Debug");
 
- 
-
   {
     int max = 0;
     int min = 999999;
     int total = 0;
-    static int frameTimes[100] = {};
-    static size_t point = 0;
-    frameTimes[point] = timehandler::clockTicks;
-    point = (point + 1) % 100;
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     static float thickness = 3.0f;
@@ -72,15 +68,14 @@ void Window::buildDebugWindow()
     float x = p.x + 4.0f;
     float y = p.y + 80.0f;
 
-    for (int i = 0; i < 100; i++) {
-      int currTime = frameTimes[i];
+    for (int i = 0; i < DEBUGFRAMES; i++) {
+      int currTime = time.frameTimes[i];
       float sz = (float)currTime;
       total += currTime;
       ImU32 col = ImColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-      if (i == point-1) {
+      if (i == time.point-1) {
         draw_list->AddRectFilled(ImVec2(x, y-80), ImVec2(x + thickness, y-sz), ImColor(ImVec4(0.4f, 1.0f, 0.4f, 1.0f)));
       }
-     
       
       //Max and Min getting found and kept for info
       if (currTime > max) 
@@ -98,7 +93,7 @@ void Window::buildDebugWindow()
     }
 
     ImGui::Dummy(ImVec2((spacing) * 10.2f, (spacing) * 1.0f+80.0f));
-    clockOut(timehandler::clockTicks,"");
+    clockOut(time.clockTicks,"");
     clockOut(max,"Max ");
     clockOut(min, "Min ");
     clockOut(total/100, "Avg ");
@@ -162,7 +157,7 @@ void Window::buildMainMenu()
     static int selected = 0;
     {
       ImGui::BeginChild("left pane", ImVec2(157, al_get_display_height(display) - 40), true, ImGuiWindowFlags_NoScrollbar);
-      for (int i = 0; i < world.size(); i++)
+      for (size_t i = 0; i < world.size(); i++)
       {
         if (ImGui::Selectable(world[i].name.c_str(), selected == i))
           selected = i;
@@ -305,17 +300,21 @@ void Window::buildWorldCreationMenu(int id) {
 
 void Window::installs()
 {
-  if (!al_init())
+  if (!al_init()) {
+    std::cerr<<__FILE__<<" : "<<__LINE__<<" Allegro was not found, check linker settings or whether it is installed. Clean exit."<<std::endl;
     std::exit(1);
+  }
+
+#ifndef IMGUI_VERSION
+  std::cerr << __FILE__ << " : " << __LINE__ << " ImGui was not found, check linker settings or whether it is installed. Clean exit." << std::endl;
+  std::exit(2);
+#endif // !IMGUI_VERSION
+
   al_install_keyboard();
   al_install_mouse();
   al_init_primitives_addon();
   al_init_font_addon();
   al_init_image_addon();
-
-#ifndef IMGUI_VERSION
-  std::exit(2);
-#endif // !IMGUI_VERSION
 }
 
 

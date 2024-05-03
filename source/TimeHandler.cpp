@@ -1,22 +1,19 @@
 #include "TimeHandler.h"
 #include <allegro5/allegro5.h>
 #include <ctime>
+#include "knightmare3config.h"
 
 int timePerSecond = 1;
 
 
-namespace timehandler {
-	bool fastmode = false;
-	int tickRate = 60;
-	double elapsedTime = 0;
-	clock_t deltaTime = clock();
-	double dayLength = 1800;
-	unsigned int day = 0;
-	int unlinkedTime = 0;
-	int clockTicks;
+TimeHandler::TimeHandler(): 
+	fastmode(false),tickRate(60),elapsedTime(0),
+	dayLength(1800),day(0),unlinkedTime(0),clockTicks(0),
+	deltaTime(0) 
+{ }
 
 	/*Changes the values for worldtime and day. Should be what determines all time based events*/
-	void changeTime() {
+void TimeHandler::changeTime() {
 		
 		clock_t currentTime = clock();
 		elapsedTime = (float)(currentTime)/CLOCKS_PER_SEC - (double)day*dayLength;
@@ -40,5 +37,10 @@ namespace timehandler {
 		//Measure Clocks between cycles with clock intervals between executions
 		clockTicks = (currentTime - deltaTime);
 		deltaTime = currentTime;
-	}
+		fillArray();
+}
+
+void TimeHandler::fillArray() {
+	frameTimes[point] = clockTicks;
+	point = (point + 1) % DEBUGFRAMES;
 }

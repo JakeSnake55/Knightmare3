@@ -39,7 +39,7 @@ typedef struct {
 } Camera;
 
 typedef struct {
-    int n, v_size;
+    size_t n, v_size;
     ALLEGRO_VERTEX* v;
 
 } VoxelSet;

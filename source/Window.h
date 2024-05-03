@@ -6,6 +6,7 @@
 #include "Settings.h"
 #include "Defs.h"
 #include "IMGUI/imgui.h"
+#include "TimeHandler.h"
 
 
 class Window 
@@ -23,6 +24,7 @@ private:
 
 
 public:
+	TimeHandler time;
 	ALLEGRO_DISPLAY* display;
 	ALLEGRO_EVENT_QUEUE* queue;
 	ALLEGRO_EVENT event;
