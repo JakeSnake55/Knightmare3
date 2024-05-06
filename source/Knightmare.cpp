@@ -22,7 +22,6 @@ Skybox sky;
 double pitchie = 0;
 
 Project km;
-Project temp;
 
 
 time_t timed;
@@ -33,55 +32,11 @@ bool drawTerrain = false;
 
 
 bool mouseSleepUpdate = true;
-bool centGrav = false;
 bool closeGame = false;
 
 int startSky = 0;
 int endSky = 0;
 
-float storedX, storedY, storedZ;
-int chunkX, chunkY, chunkZ;
-
-
-VoxelSet loadedChunks = {};
-
-VoxelSet generatedChunkArray[8][8][8] = {};
-
-Terrain generated[16][16][16] = {};
-
-
-
-/*Generate z height*/
-int height_generator(int x, int y, int size, int chunkZ) {
-  if (chunkZ < 0)
-    return size;
-  if (chunkZ > 0)
-    return 0;
-  return 3 + perlin((chunkY * size + y) * 0.1, (chunkX * size + x) * 0.1) * 3;
-}
-
-/* Generate Checkered cubes*/
-static void chunk_generator(int chunkX = 0, int chunkY = 0, int chunkZ = 0)
-{
-  int z = 0;
-  Terrain tmp = {};
-  int size = 16;
-  for (int x = 0; x < size; x++) {
-    for (int y = 0; y < size; y++) {
-      for (int j = 0; j < 16; j++) {
-        generated[x][y][j].material = NOBLOCK;
-      }
-      z = height_generator(x, y, size, chunkZ);
-
-      Colour stoneColour = { 0.5f,0.5f,0.5f,1 };
-
-      for (int j = 0; (j < z && j < 16); j++) {
-        generated[x][y][j].material = STONE;
-        generated[x][y][j].colour = stoneColour;
-      }
-    }
-  }
-}
 
 static void draw_windows(Window &window) {
   if (window.settings.showOptionsMenu) {
@@ -107,10 +62,7 @@ static void draw_windows(Window &window) {
 static void draw_scene(Window& window)
 {
   ImGui_ImplAllegro5_NewFrame();
-  if (window.settings.redrawChunks) {
 
-    window.settings.redrawChunks = false;
-  }
   if (window.settings.drawNewSkybox) {
     sky.loadSeed(window.world[window.settings.currentId].seed);
   }
@@ -165,23 +117,6 @@ static void draw_scene(Window& window)
   al_clear_depth_buffer(1);
   al_set_render_state(ALLEGRO_DEPTH_TEST, 1);
 
-  if (window.settings.drawTerrain) {
-
-    for (int i = 0; i < 8; i++) {
-      for (int j = 0; j < 8; j++) {
-        for (int d = 0; d < 8; d++) {
-          if (!window.settings.wireFrame)
-          {
-            al_draw_prim(generatedChunkArray[i][j][d].v, NULL, NULL, 0, generatedChunkArray[i][j][d].n, ALLEGRO_PRIM_TRIANGLE_LIST);
-          }
-          else {
-            al_draw_prim(generatedChunkArray[i][j][d].v, NULL, NULL, 0, generatedChunkArray[i][j][d].n, ALLEGRO_PRIM_LINE_LIST);
-          }
-        }
-      }
-    }
-  }
- 
   ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
   window.render();
 
@@ -208,13 +143,6 @@ static void setup_scene(Window& window)
 }
 
 void playerMotion(double x, double y, double z, Window& window) {
-  /* With CentGrav enabled, always move the camera to height 32(player height). */
-  if (centGrav) {
-    if (km.camera.position.y > 16)
-      km.camera.position.y -= 0.16 * km.movement_speed;
-    if (km.camera.position.y < 16)
-      km.camera.position.y += 0.16 * km.movement_speed;
-  }
 
   /* Move the camera, along the ground axis. */
   double xyz = sqrt(x * x + y * y + z * z);//distance of motion
@@ -359,30 +287,31 @@ int main(int argc, char** argv)
     if (al_peek_next_event(queue, &window.event)) {
       window.getEvent();
       ImGui_ImplAllegro5_ProcessEvent(&window.event);
-      if (window.event.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+      switch (window.event.type) {
+      case ALLEGRO_EVENT_DISPLAY_CLOSE:
         closeGame = true;
-      else if (window.event.type == ALLEGRO_EVENT_DISPLAY_RESIZE) {
+        break;
+      case ALLEGRO_EVENT_DISPLAY_RESIZE:
         ImGui_ImplAllegro5_InvalidateDeviceObjects();
         al_acknowledge_resize(display);
         ImGui_ImplAllegro5_CreateDeviceObjects();
-      }
-      else if (window.event.type == ALLEGRO_EVENT_KEY_DOWN) {
-
-        /*Set key and keystate of keycode.
-        */
+        break;
+      case ALLEGRO_EVENT_KEY_DOWN:
         km.key[window.event.keyboard.keycode] = true;
         km.keystate[window.event.keyboard.keycode] = true;
-      }
-      else if (window.event.type == ALLEGRO_EVENT_KEY_UP) {
+        break;
+
+      case ALLEGRO_EVENT_KEY_UP:
         /* In case a key gets pressed and immediately released, we will still
          * have set ex.key so it is not lost.
          */
         km.keystate[window.event.keyboard.keycode] = false;
-      }
-      else if (window.event.type == ALLEGRO_EVENT_TIMER) {
+        break;
+      case ALLEGRO_EVENT_TIMER:
 
         if (closeGame) {
-          break;
+          window.cleanExit();
+          return false;
         }
         int i;
         if (window.settings.keyboardSleep)
@@ -408,27 +337,24 @@ int main(int argc, char** argv)
         else {
           al_show_mouse_cursor(display);
         }
-      }
-
-      else if (window.event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+        break;
+      case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
         km.button[window.event.mouse.button] = true;
-      }
-      else if (window.event.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {
+        break;
+      case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
         km.button[window.event.mouse.button] = false;
+        break;
+      case ALLEGRO_EVENT_MOUSE_AXES:
+        km.mouse_dx += window.event.mouse.dx;
+        km.mouse_dy += window.event.mouse.dy;
+        break;
       }
-      else {
-        if (window.event.type == ALLEGRO_EVENT_MOUSE_AXES) {
-          km.mouse_dx += window.event.mouse.dx;
-          km.mouse_dy += window.event.mouse.dy;
-        }
-      }
-    }
 
-    if (redraw && al_is_event_queue_empty(queue)) {
-      draw_scene(window);
-      redraw = false;
+      if (redraw && al_is_event_queue_empty(queue)) {
+        draw_scene(window);
+        redraw = false;
+      }
+
     }
   }
-  window.cleanExit();
-  return false;
 }
