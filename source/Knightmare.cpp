@@ -3,6 +3,7 @@
  */
 #include "Defs.h"
 #include "Vector.h"
+#include "Knightmare.h"
 #include <random>
 #include <time.h>
 #include <cmath>
@@ -24,21 +25,35 @@ double pitchie = 0;
 Project km;
 
 
-time_t timed;
-time_t timing;
-
-bool drawTerrain = false;
-
-
-
 bool mouseSleepUpdate = true;
 bool closeGame = false;
 
 int startSky = 0;
 int endSky = 0;
 
+knightmare::knightmare() {
+  redraw = true;
+  initializeScenes();
+  display = window.display;
+  queue = window.queue;
 
-static void draw_windows(Window &window) {
+  ALLEGRO_BITMAP* icon[3] = { al_load_bitmap("Resources/ml48x.png"), al_load_bitmap("Resources/ml32x.png"),
+                              al_load_bitmap("Resources/ml16x.png") };
+  if (icon)
+    al_set_display_icons(display, 1, icon);
+
+  ALLEGRO_MONITOR_INFO info;
+  al_get_monitor_info(al_get_num_video_adapters() - 1, &info);
+
+  display_height = info.y2 - info.y1;
+  display_width = info.x2 - info.x1;
+  setup_scene();
+  while (true) {
+    gameLoop();
+  }
+}
+
+void knightmare::draw_windows() {
   if (window.settings.showOptionsMenu) {
     window.buildOptionMenu();
   }
@@ -59,7 +74,7 @@ static void draw_windows(Window &window) {
 }
 
 
-static void draw_scene(Window& window)
+void knightmare::draw_scene()
 {
   ImGui_ImplAllegro5_NewFrame();
 
@@ -79,7 +94,7 @@ static void draw_scene(Window& window)
   ALLEGRO_COLOR back = al_map_rgba(0, 0, 0, 128);
 
   ImGui::NewFrame();//Must be before Imgui windows are drawn.
-  draw_windows(window);
+  draw_windows();
   ImGui::Render(); //Must end before primitives are drawn.
   setup_3d_projection(window.settings.FOV);
 
@@ -113,18 +128,17 @@ static void draw_scene(Window& window)
       al_draw_prim(km.general.v, NULL, NULL, startSky, endSky, ALLEGRO_PRIM_LINE_LIST);
     }
   }
-
-  al_clear_depth_buffer(1);
-  al_set_render_state(ALLEGRO_DEPTH_TEST, 1);
-
+  km.general.n = 0;
   ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
   window.render();
 
 }
 
 
-static void setup_scene(Window& window)
+void knightmare::setup_scene()
 {
+  timer = al_create_timer(1.0 / 60.0);
+  al_register_event_source(queue, al_get_timer_event_source(timer));
   km.camera.xaxis.x = 1;
   km.camera.yaxis.y = 1;
   km.camera.zaxis.z = 1;
@@ -139,17 +153,17 @@ static void setup_scene(Window& window)
   km.general = {};
 
   sky.add_skybox(window, km, startSky, endSky);
-
+  al_start_timer(timer);
 }
 
-void playerMotion(double x, double y, double z, Window& window) {
+void knightmare::playerMotion(double x, double y, double z) {
 
   /* Move the camera, along the ground axis. */
-  double xyz = sqrt(x * x + y * y + z * z);//distance of motion
-  if (xyz > 0) {
-    x /= xyz;
-    y /= xyz;
-    z /= xyz;
+  double distance = sqrt(x * x + y * y + z * z);//distance of motion
+  if (distance > 0) {
+    x /= distance;
+    y /= distance;
+    z /= distance;
 
     camera_move_along_ground(&km.camera, km.movement_speed * x,
       km.movement_speed * y);
@@ -178,7 +192,7 @@ void playerMotion(double x, double y, double z, Window& window) {
   }
 }
 
-static void handle_input(Window& window)
+void knightmare::handle_input()
 {
   ImGuiIO io = ImGui::GetIO();
   double x = 0, y = 0, z = 0;
@@ -192,7 +206,8 @@ static void handle_input(Window& window)
 
   /* Change field of view with Z/X. */
   if (io.KeysDown[ALLEGRO_KEY_ESCAPE]) {
-    closeGame = true;
+    window.cleanExit();
+    exit(0);
   }
   if (io.KeysDown[ALLEGRO_KEY_Z]) {
     double m = 20 * pi / 180;
@@ -228,14 +243,16 @@ static void handle_input(Window& window)
     window.time.fastmode = false;
   }
 
-  playerMotion(x, y, z, window);
+  playerMotion(x, y, z);
 }
-void initializeScenes()
+
+
+void knightmare::initializeScenes()
 {
 
-  al_set_new_display_option(ALLEGRO_SAMPLE_BUFFERS, 1, ALLEGRO_SUGGEST);
-  al_set_new_display_option(ALLEGRO_SAMPLES, 8, ALLEGRO_SUGGEST);
-  al_set_new_display_option(ALLEGRO_DEPTH_SIZE, 16, ALLEGRO_SUGGEST);
+  //al_set_new_display_option(ALLEGRO_SAMPLE_BUFFERS, 1, ALLEGRO_SUGGEST);
+  //al_set_new_display_option(ALLEGRO_SAMPLES, 8, ALLEGRO_SUGGEST);
+  //al_set_new_display_option(ALLEGRO_DEPTH_SIZE, 16, ALLEGRO_SUGGEST);
   al_set_new_display_flags(ALLEGRO_RESIZABLE);
   al_set_new_display_flags(ALLEGRO_FULLSCREEN);
   al_set_new_display_flags(ALLEGRO_NOFRAME);
@@ -244,117 +261,78 @@ void initializeScenes()
 
 }
 
+void knightmare::gameLoop() {
+  window.time.changeTime();
+  if (al_peek_next_event(queue, &window.event)) {
+    window.getEvent();
+    ImGui_ImplAllegro5_ProcessEvent(&window.event);
+    switch (window.event.type) {
+    case ALLEGRO_EVENT_DISPLAY_CLOSE:
+      window.cleanExit();
+      exit(0);
+    case ALLEGRO_EVENT_DISPLAY_RESIZE:
+      ImGui_ImplAllegro5_InvalidateDeviceObjects();
+      al_acknowledge_resize(display);
+      ImGui_ImplAllegro5_CreateDeviceObjects();
+      break;
+    case ALLEGRO_EVENT_KEY_DOWN:
+      km.key[window.event.keyboard.keycode] = true;
+      km.keystate[window.event.keyboard.keycode] = true;
+      break;
+
+    case ALLEGRO_EVENT_KEY_UP:
+      /* In case a key gets pressed and immediately released, we will still
+       * have set ex.key so it is not lost.
+       */
+      km.keystate[window.event.keyboard.keycode] = false;
+      break;
+    case ALLEGRO_EVENT_TIMER:
+
+      if (window.settings.keyboardSleep)
+        handle_input();
+
+      redraw = true;
+
+      /* Reset keyboard state for keys not held down anymore. */
+      for (int i = 0; i < ALLEGRO_KEY_MAX; i++) {
+        if (km.keystate[i] == 0)
+          km.key[i] = 0;
+      }
+
+      km.mouse_dx = 0;
+      km.mouse_dy = 0;
+      if (window.settings.turnCamera) {
+        if (mouseSleepUpdate) {
+          al_hide_mouse_cursor(display);
+          mouseSleepUpdate = false;
+        }
+        al_set_mouse_xy(display, display_width / 2, display_height / 2);
+      }
+      else {
+        al_show_mouse_cursor(display);
+      }
+      break;
+    case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+      km.button[window.event.mouse.button] = true;
+      break;
+    case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
+      km.button[window.event.mouse.button] = false;
+      break;
+    case ALLEGRO_EVENT_MOUSE_AXES:
+      km.mouse_dx += window.event.mouse.dx;
+      km.mouse_dy += window.event.mouse.dy;
+      break;
+    }
+
+    if (redraw && al_is_event_queue_empty(queue)) {
+      draw_scene();
+      redraw = false;
+    }
+
+  }
+}
+
 int main(int argc, char** argv)
 {
-
-  Window window;
-  ALLEGRO_TIMER* timer;
-  ALLEGRO_EVENT_QUEUE* queue = window.queue;
-  ALLEGRO_DISPLAY* display = window.display;
-  ALLEGRO_MONITOR_INFO info;
-
-
-  //initializeScenes();
-  time(&timed);
-  bool redraw = true;
-
-  //al_set_new_display_adapter(al_get_num_video_adapters() - 1);
-
-
-  al_get_monitor_info(al_get_num_video_adapters() - 1, &info);
-
-  int display_width = info.x2 - info.x1;
-  int display_height = info.y2 - info.y1;
-
-  ALLEGRO_BITMAP* icon[3] = { al_load_bitmap("Resources/ml48x.png"), al_load_bitmap("Resources/ml32x.png"),
-                              al_load_bitmap("Resources/ml16x.png") };
-
-  if (icon)
-    al_set_display_icons(display, 1, icon);
-
-  //printf("%d\n", al_get_num_video_adapters());
-
-  timer = al_create_timer(1.0 / 60.0);
-
-
-  al_register_event_source(queue, al_get_timer_event_source(timer));
-  setup_scene(window);
-  al_start_timer(timer);
-
-
-  while (true) {
-    window.time.changeTime();
-    if (al_peek_next_event(queue, &window.event)) {
-      window.getEvent();
-      ImGui_ImplAllegro5_ProcessEvent(&window.event);
-      switch (window.event.type) {
-      case ALLEGRO_EVENT_DISPLAY_CLOSE:
-        closeGame = true;
-        break;
-      case ALLEGRO_EVENT_DISPLAY_RESIZE:
-        ImGui_ImplAllegro5_InvalidateDeviceObjects();
-        al_acknowledge_resize(display);
-        ImGui_ImplAllegro5_CreateDeviceObjects();
-        break;
-      case ALLEGRO_EVENT_KEY_DOWN:
-        km.key[window.event.keyboard.keycode] = true;
-        km.keystate[window.event.keyboard.keycode] = true;
-        break;
-
-      case ALLEGRO_EVENT_KEY_UP:
-        /* In case a key gets pressed and immediately released, we will still
-         * have set ex.key so it is not lost.
-         */
-        km.keystate[window.event.keyboard.keycode] = false;
-        break;
-      case ALLEGRO_EVENT_TIMER:
-
-        if (closeGame) {
-          window.cleanExit();
-          return false;
-        }
-        int i;
-        if (window.settings.keyboardSleep)
-          handle_input(window);
-
-        redraw = true;
-
-        /* Reset keyboard state for keys not held down anymore. */
-        for (i = 0; i < ALLEGRO_KEY_MAX; i++) {
-          if (km.keystate[i] == 0)
-            km.key[i] = 0;
-        }
-
-        km.mouse_dx = 0;
-        km.mouse_dy = 0;
-        if (window.settings.turnCamera) {
-          if (mouseSleepUpdate) {
-            al_hide_mouse_cursor(display);
-            mouseSleepUpdate = false;
-          }
-          al_set_mouse_xy(display, display_width / 2, display_height / 2);
-        }
-        else {
-          al_show_mouse_cursor(display);
-        }
-        break;
-      case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
-        km.button[window.event.mouse.button] = true;
-        break;
-      case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
-        km.button[window.event.mouse.button] = false;
-        break;
-      case ALLEGRO_EVENT_MOUSE_AXES:
-        km.mouse_dx += window.event.mouse.dx;
-        km.mouse_dy += window.event.mouse.dy;
-        break;
-      }
-
-      if (redraw && al_is_event_queue_empty(queue)) {
-        draw_scene(window);
-        redraw = false;
-      }
-
-    }
-  }
+  knightmare kn;
 }

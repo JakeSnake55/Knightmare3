@@ -171,6 +171,7 @@
     <ClInclude Include="source\IMGUI\imstb_rectpack.h" />
     <ClInclude Include="source\IMGUI\imstb_textedit.h" />
     <ClInclude Include="source\IMGUI\imstb_truetype.h" />
+    <ClInclude Include="source\Knightmare.h" />
     <ClInclude Include="source\knightmare3config.h" />
     <ClInclude Include="source\PerlinNoiseGenerator.h" />
     <ClInclude Include="source\Projection.h" />
