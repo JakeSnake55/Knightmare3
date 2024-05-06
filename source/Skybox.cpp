@@ -50,8 +50,8 @@ void Skybox::StarPositioner() {
         moonSpotsList[i].x = (10 - (moonSpotsList[i].s / 2)) * distribute(gen);
         moonSpotsList[i].y = (10 - (moonSpotsList[i].s / 2)) * distribute(gen);
         sunSpotsList[i].s = (randSize(gen) * 2.0);
-        sunSpotsList[i].x = (11 - (sunSpotsList[i].s / 2)) * distribute(gen);
-        sunSpotsList[i].y = (11 - (sunSpotsList[i].s / 2)) * distribute(gen);
+        sunSpotsList[i].x = (11 - (sunSpotsList[i].s / 2.0)) * distribute(gen);
+        sunSpotsList[i].y = (12 - (sunSpotsList[i].s / 2.0)) * distribute(gen);
     }
 
 }
@@ -98,18 +98,18 @@ void Skybox::add_skybox(Window& window, Project &km, int &startSky, int &endSky)
     }
 
     // Moon 
-    add_quad((double)p.x - (double)light.x * 50 - 5.0 * right.x - 5.0 * up.x, (double)p.y - (double)light.y * 50 - 5.0 * right.y - 5.0 * up.y, (double)p.z - 5.0 * right.z - 5.0 * up.z,
+    add_quad((double)p.x - (double)light.x * 50, (double)p.y - (double)light.y * 50 , (double)p.z ,
         (double)right.x * 10, (double)right.y * 10, (double)right.z * 10,
         (double)up.x * 10, (double)up.y * 10, (double)up.z * 10,
         whiteColour, whiteColour, window, km.general);
 
     // Sun 
-    add_quad((double)p.x + (double)light.x * 50 - 7.0 * right.x - 7.0 * up.x,(double)p.y + (double)light.y * 50 - 7.0 * right.y - 7.0 * up.y, p.z - 7.0 * right.z - 7.0 * up.z,
+    add_quad((double)p.x + (double)light.x * 50 - 1.0 * right.x - 1.0 * up.x,(double)p.y + (double)light.y * 50 - 1.0 * right.y - 1.0 * up.y, p.z - 1.0 * right.z - 1.0 * up.z,
         right.x * 14.0, right.y * 14.0, right.z * 14.0,
         up.x * 14.0, up.y * 14.0, up.z * 14.0,
         orangishYellow, orangishYellow, window, km.general);
 
-    add_quad((double)p.x + (double)light.x * 50 - 6.0 * right.x - 6.0 * up.x, (double)p.y + (double)light.y * 50 - 6.0 * right.y - 6.0 * up.y, p.z - 6.0 * right.z - 6.0 * up.z,
+    add_quad((double)p.x + (double)light.x * 50 , (double)p.y + (double)light.y * 50 , p.z ,
         right.x * 12.0, right.y * 12.0, right.z * 12.0,
         up.x * 12.0, up.y * 12.0, up.z * 12.0,
         whiteColour, whiteColour, window, km.general);
@@ -124,12 +124,12 @@ void Skybox::add_skybox(Window& window, Project &km, int &startSky, int &endSky)
         int sunX = sunSpotsList[i].x;
         int sunY = sunSpotsList[i].y;
 
-        add_quad((double)p.x - (double)light.x * 50 + up.x * (y - 5.0) + right.x * (x - 5.0),(double) p.y - (double)light.y * 50 + up.y * (y - 5.0) + right.y * (x - 5.0), p.z + up.z * (y - 5.0) + right.z * (x - 5.0),
+        add_quad((double)p.x - (double)light.x * 50 + (double)up.x * y  + (double)right.x * x ,(double) p.y - (double)light.y * 50 + (double)up.y * y + (double)right.y * x , (double)p.z + (double)up.z * y  + (double)right.z * x ,
             (double)right.x * size, (double)right.y * size, (double)right.z * size,
             (double)up.x * size, (double)up.y * size, (double)up.z * size,
             grayShading, grayShading, window, km.general);
 
-        add_quad((double)p.x + (double)light.x * 50 + up.x * (sunY - 6.0) + right.x * (sunX - 6.0),(double) p.y + (double)light.y * 50 + up.y * (sunY - 6.0) + right.y * (sunX - 6.0), p.z + up.z * (sunY - 6.0) + right.z * (sunX - 6.0),
+        add_quad((double)p.x + (double)light.x * 50 + (double)up.x * (double)sunY + (double)right.x * sunX,(double) p.y + (double)light.y * 50 + (double)up.y * sunY + (double)right.y * sunX , (double)p.z + (double)up.z * (double)sunY  + (double)right.z * sunX,
             (double)right.x * sunSize, (double)right.y * sunSize, (double)right.z * sunSize,
             (double)up.x * sunSize, (double)up.y * sunSize, (double)up.z * sunSize,
             orangishYellow, orangishYellow, window, km.general);

@@ -110,10 +110,10 @@ void setup_3d_projection(float vertical_field_of_view)
     ALLEGRO_DISPLAY* display = al_get_current_display();
     double dw = al_get_display_width(display);
     double dh = al_get_display_height(display);
-    double f;
+    double f = (vertical_field_of_view/180.0)*pi;
     al_identity_transform(&projection);
     al_translate_transform_3d(&projection, 0, 0, -1);
-    f = tan(vertical_field_of_view / 2);
+    f = tan(f / 2);
     al_perspective_transform(&projection, -1 * dw / dh * f, f,
         1,
         f * dw / dh, -f, 10000000000000);//Check here later, draw distance? but also affects colours?

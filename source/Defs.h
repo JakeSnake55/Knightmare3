@@ -59,15 +59,15 @@ typedef struct {
 
     /* control scheme selection */
     int controls;
-    char const* controls_names[3];
+    
 
     VoxelSet general;
 
     /* used to draw some info text */
     ALLEGRO_FONT* font;
 
-    /* if not NULL the skybox picture to use */
-    ALLEGRO_BITMAP* skybox;
+   
+   
 } Project;
 
 enum Material

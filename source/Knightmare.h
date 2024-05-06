@@ -9,12 +9,13 @@ private:
   ALLEGRO_EVENT_QUEUE* queue;
   ALLEGRO_TIMER* timer;
 
+  void initializeScenes();
   void draw_scene();
   void handle_input();
   void playerMotion(double x, double y, double z);
   void setup_scene();
   void draw_windows();
-  void initializeScenes();
+
 
 public:
   knightmare();

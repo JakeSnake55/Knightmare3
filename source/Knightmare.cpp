@@ -98,7 +98,6 @@ void knightmare::draw_scene()
   ImGui::Render(); //Must end before primitives are drawn.
   setup_3d_projection(window.settings.FOV);
 
-
   if (window.settings.drawSkybox)
   {
     startSky = km.general.n;

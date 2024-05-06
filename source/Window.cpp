@@ -109,7 +109,7 @@ void Window::buildDebugWindow()
   ImGui::Checkbox("Draw Sky", &settings.drawSkybox);
   ImGui::Checkbox("Activate Camera", &settings.turnCamera);
   ImGui::Checkbox("Activate Keyboard", &settings.keyboardSleep);
-  ImGui::SliderFloat("FOV", &settings.FOV, 0, ALLEGRO_PI, "%.3f");
+  ImGui::SliderFloat("FOV", &settings.FOV, 0, 180, "%.3f");
   ImGui::SliderFloat("Zoom", &settings.zoom, 0, 10, "%.3f");
 
 

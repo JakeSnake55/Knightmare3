@@ -19,7 +19,7 @@ public:
 	bool keyboardSleep = true;
 
 	bool redrawChunks = true;
-	float FOV = ALLEGRO_PI/2;
+	float FOV = 70;
 	float zoom = 1;
 	bool makeNewWorld = false;
 	int currentId = -1;
