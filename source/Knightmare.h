@@ -7,7 +7,7 @@ private:
   int display_height;
   ALLEGRO_DISPLAY* display;
   ALLEGRO_EVENT_QUEUE* queue;
-  ALLEGRO_TIMER* timer;
+  ALLEGRO_EVENT ev;
 
   void initializeScenes();
   void draw_scene();
@@ -15,6 +15,7 @@ private:
   void playerMotion(double x, double y, double z);
   void setup_scene();
   void draw_windows();
+  void createEventQueue();
 
 
 public:

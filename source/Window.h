@@ -12,9 +12,7 @@
 class Window 
 {
 private:
-	void installs();
 	void createWindow();
-	void createEventQueue();
 	void setupImgui();
 
 	void addStyles();
@@ -26,8 +24,6 @@ private:
 public:
 	TimeHandler time;
 	ALLEGRO_DISPLAY* display;
-	ALLEGRO_EVENT_QUEUE* queue;
-	ALLEGRO_EVENT event;
 	Settings settings;
 	Camera camera;
 	std::vector<World> world;
@@ -38,7 +34,6 @@ public:
 	void buildOptionMenu();
 	void buildWorldCreationMenu(int id = -1);
 	void cleanExit();
-	bool getEvent();
 	void render();
 };
 

@@ -21,14 +21,13 @@
 Window::Window()
 {
   world.resize(0);
-  installs();
   createWindow();
-  createEventQueue();
   setupImgui();
   file.loadWorldFolder(world);
   for (int i = 0; i < ImGuiCol_COUNT; i++) {
     StyleColors[i] = ImGui::GetStyleColorVec4(i);
   }
+  time.syncTime();
 }
 
 void Window::addStyles() {
@@ -43,7 +42,7 @@ static void popStyles() {
 }
 
 void clockOut(int value, std::string prefix) {
-  ImGui::Text((prefix+"Clock Cycles: %d Clocks, %f Seconds, %d FPS").c_str(), value, (float)(value) / (float)(CLOCKS_PER_SEC), (value == 0) ? -1 : (int)((float)(CLOCKS_PER_SEC) / (float)(value)));
+  ImGui::Text((prefix + "Clock Cycles: %d Clocks, %d milliseconds").c_str(), value, (int)((value*1000.0) / (float)(CLOCKS_PER_SEC)));
 }
 
 //Builds the Debug window for developer use only
@@ -53,53 +52,59 @@ void Window::buildDebugWindow()
   ImGui::Begin("Debug");
 
   {
-    int max = 0;
-    int min = 999999;
-    int total = 0;
+    int max[4] = { 0 };
+    int min[4] = { 999999 };
+    int total[4] = {0};
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     static float thickness = 3.0f;
 
+    ImU32 colour[4] = {
+      ImColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), ImColor(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)),
+      ImColor(ImVec4(0.0f, 1.0f, 0.0f, 1.0f)), ImColor(ImVec4(0.0f, 0.0f, 1.0f, 1.0f)) };
 
     const ImVec2 p = ImGui::GetCursorScreenPos();
-   
+
     const float spacing = 10.0f;
 
-    float x = p.x + 4.0f;
-    float y = p.y + 80.0f;
+    for (int j = 0; j < 4; j++) {
+      for (int i = 0; i < DEBUGFRAMES; i++) {
+        if (time.frameTimes[j][i] > max[j])
+          max[j] = time.frameTimes[j][i];
 
-    for (int i = 0; i < DEBUGFRAMES; i++) {
-      int currTime = time.frameTimes[i];
-      float sz = (float)currTime;
-      total += currTime;
-      ImU32 col = ImColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-      if (i == time.point-1) {
-        draw_list->AddRectFilled(ImVec2(x, y-80), ImVec2(x + thickness, y-sz), ImColor(ImVec4(0.4f, 1.0f, 0.4f, 1.0f)));
+        if (time.frameTimes[j][i] < min[j])
+          min[j] = time.frameTimes[j][i];
       }
-      
-      //Max and Min getting found and kept for info
-      if (currTime > max) 
-      {
-        col = ImColor(ImVec4(0.4f, 0.4f, 1.0f, 1.0f));
-        max = currTime;
+    }
+    for (int j = 1; j < 4; j++) {
+      float x = p.x + 4.0f;
+      float y = p.y + 80.0f;
+      for (int i = 0; i < DEBUGFRAMES; i++) {
+        int currTime = time.frameTimes[j][(time.point + i) % DEBUGFRAMES];
+        float sz = (float)currTime;
+        float lowTime = 0;
+        if(j>=2)
+          lowTime = time.frameTimes[j-1][(time.point + i) % DEBUGFRAMES];
+        total[j] += currTime-lowTime;
+        
+
+        draw_list->AddRectFilled(ImVec2(x, y-lowTime), ImVec2(x + thickness, y - sz), colour[j]);
+        x += thickness;
       }
-      if (currTime < min) {
-        col = ImColor(ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
-        min = currTime;
-      }
-      
-      draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x + thickness, y - sz), col);
-      x += thickness;// Vertical line (faster than AddLine, but only handle integer thickness)
     }
 
-    ImGui::Dummy(ImVec2((spacing) * 10.2f, (spacing) * 1.0f+80.0f));
-    clockOut(time.clockTicks,"");
-    clockOut(max,"Max ");
-    clockOut(min, "Min ");
-    clockOut(total/100, "Avg ");
-  }
 
- 
+    ImGui::Dummy(ImVec2((spacing) * 10.2f, (spacing) * 1.0f + 80.0f));
+    clockOut(time.clockTicks, "");
+    const char * titles[4] = { "Total Time","Process Time","Render Time","VSync Time" };
+    for (int j = 0; j < 4; j++) {
+      ImGui::Text(titles[j]);
+      clockOut(max[j], "Max ");
+      clockOut(min[j], "Min ");
+      clockOut(total[j] / 100.0, "Avg ");
+    }
+   
+  }
 
   ImGui::Checkbox("Demo Window", &settings.showDemoWindow);//Shows what is possible with ImGui
   ImGui::Checkbox("VSync", &settings.waitForVSync);//Pauses frames to achieve VSync
@@ -227,30 +232,30 @@ void Window::buildOptionMenu()
   addStyles();
 
   ImGui::Begin("Option Menu", NULL, flags);
-  
 
-    if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
-    {
-      if (ImGui::BeginTabItem("Colours")) {
-        for (int i = 0; i < ImGuiCol_COUNT; i++) {
-          ImGui::ColorEdit4(ImGui::GetStyleColorName(i), (float*)&StyleColors[i]);
-        }
-        ImGui::EndTabItem();
+
+  if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
+  {
+    if (ImGui::BeginTabItem("Colours")) {
+      for (int i = 0; i < ImGuiCol_COUNT; i++) {
+        ImGui::ColorEdit4(ImGui::GetStyleColorName(i), (float*)&StyleColors[i]);
       }
-
-      if (ImGui::BeginTabItem("Misc")) {
-
-        if (&settings.showOptionsMenu && ImGui::Button("Close Options")) {
-          settings.showOptionsMenu = false;
-        }
-
-        ImGui::EndTabItem();
-      }
-      ImGui::EndTabBar();
+      ImGui::EndTabItem();
     }
 
-    ImGui::End();
-  
+    if (ImGui::BeginTabItem("Misc")) {
+
+      if (&settings.showOptionsMenu && ImGui::Button("Close Options")) {
+        settings.showOptionsMenu = false;
+      }
+
+      ImGui::EndTabItem();
+    }
+    ImGui::EndTabBar();
+  }
+
+  ImGui::End();
+
 
   popStyles();
 }
@@ -298,41 +303,11 @@ void Window::buildWorldCreationMenu(int id) {
 }
 
 
-void Window::installs()
-{
-  if (!al_init()) {
-    std::cerr<<__FILE__<<" : "<<__LINE__<<" Allegro was not found, check linker settings or whether it is installed. Clean exit."<<std::endl;
-    std::exit(1);
-  }
-
-#ifndef IMGUI_VERSION
-  std::cerr << __FILE__ << " : " << __LINE__ << " ImGui was not found, check linker settings or whether it is installed. Clean exit." << std::endl;
-  std::exit(2);
-#endif // !IMGUI_VERSION
-
-  al_install_keyboard();
-  al_install_mouse();
-  al_init_primitives_addon();
-  al_init_font_addon();
-  al_init_image_addon();
-}
-
-
 void Window::createWindow()
 {
-  al_set_new_display_flags(ALLEGRO_VSYNC);
   al_set_new_display_flags(ALLEGRO_RESIZABLE);
   display = al_create_display(1280, 720);
   al_set_window_title(display, "Knightmare 3.0");
-}
-
-void Window::createEventQueue()
-{
-  //double FPS = 60.0;
-  queue = al_create_event_queue();
-  al_register_event_source(queue, al_get_display_event_source(display));
-  al_register_event_source(queue, al_get_keyboard_event_source());
-  al_register_event_source(queue, al_get_mouse_event_source());
 }
 
 void Window::setupImgui()
@@ -373,19 +348,12 @@ void Window::cleanExit()
 {
   ImGui_ImplAllegro5_Shutdown();
   ImGui::DestroyContext();
-  al_destroy_event_queue(queue);
+
   al_destroy_display(display);
 }
 
-bool Window::getEvent()
-{
-  return al_get_next_event(queue, &event);
-}
 
 void Window::render()
 {
-  if (settings.waitForVSync)
-    al_wait_for_vsync();
   al_flip_display();
-
 }

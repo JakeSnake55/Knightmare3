@@ -10,13 +10,30 @@ struct TimeHandler{
 	int unlinkedTime;
 	unsigned int day;
 	double dayLength;
-	int clockTicks;
+	clock_t clockTicks;
+	clock_t processTime;
+	clock_t renderTime;
+	clock_t vsyncTime;
 	TimeHandler();
 	void changeTime();
+	void changeWorldTime();
 	void fillArray();
+	void syncTime();
 
-	int frameTimes[DEBUGFRAMES] = {};
+	void processLog();
+	void renderLog();
+	void vsyncLog();
+
+	int frameTimes[4][DEBUGFRAMES] = {};
 	size_t point = 0;
+	bool timer = false;
+	float refresh = 60;
 	
 };
 
+enum logs {
+	TOTAL,
+	PROCESS,
+	RENDER,
+	VSYNC
+};

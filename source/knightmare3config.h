@@ -6,4 +6,4 @@
 
 #define SCALE 0.03
 
-#define DEBUGFRAMES 200
+#define DEBUGFRAMES 100
