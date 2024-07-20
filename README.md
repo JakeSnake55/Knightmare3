@@ -8,6 +8,8 @@ Current features:
 	Full screen starting window
 	Skybox generator from Knightmare 1st version
 	Perspectives from Allegro
+	Loading from incorrect folder will run without assets
+	Set up project to now place executable in expected location on compile
 
 Work in Progress:
 	Debug data
@@ -25,6 +27,7 @@ Known Issues:
 	Linux shows build_chunks() leads to a segmentation fault.
 	Linux shows something in removing the main menu to enter a map leads to a segmentation fault of some kind.
 	ValGrind makes me worried about memory leaks and possible issues. I want to root out all warnings, and possible issues.
+	Game runs really slowly, most of the time is spent on Processing, but disabling keyboard, display and mouse do not affect the time taken.
 
 
 Error Codes:

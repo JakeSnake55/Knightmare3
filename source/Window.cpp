@@ -69,14 +69,18 @@ void Window::buildDebugWindow()
 
     for (int j = 0; j < 4; j++) {
       for (int i = 0; i < DEBUGFRAMES; i++) {
-        if (time.frameTimes[j][i] > max[j])
-          max[j] = time.frameTimes[j][i];
+        float offset = 0;
+        if (j >= 2) {
+          offset = time.frameTimes[j - 1][i];
+        }
+        if (time.frameTimes[j][i] - offset > max[j])
+          max[j] = time.frameTimes[j][i]-offset;
 
-        if (time.frameTimes[j][i] < min[j])
-          min[j] = time.frameTimes[j][i];
+        if (time.frameTimes[j][i]-offset < min[j])
+          min[j] = time.frameTimes[j][i]-offset;
       }
     }
-    for (int j = 1; j < 4; j++) {
+    for (int j = 0; j < 4; j++) {
       float x = p.x + 4.0f;
       float y = p.y + 80.0f;
       for (int i = 0; i < DEBUGFRAMES; i++) {

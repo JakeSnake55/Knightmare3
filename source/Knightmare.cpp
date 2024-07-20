@@ -39,9 +39,11 @@ knightmare::knightmare() {
   display = window.display;
   createEventQueue();
 
-  ALLEGRO_BITMAP* icon[3] = { al_load_bitmap("Resources/ml48x.png"), al_load_bitmap("Resources/ml32x.png"),
-                              al_load_bitmap("Resources/ml16x.png") };
-  if (icon)
+  ALLEGRO_BITMAP* icon[3] = { nullptr };
+  icon[0] = al_load_bitmap("Resources/ml48x.png");
+  icon[1] = al_load_bitmap("Resources/ml32x.png");
+  icon[2] = al_load_bitmap("Resources/ml16x.png");
+  if (icon[0])
     al_set_display_icons(display, 1, icon);
 
   ALLEGRO_MONITOR_INFO info;
