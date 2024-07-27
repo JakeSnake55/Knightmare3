@@ -316,27 +316,24 @@ void knightmare::gameLoop() {
     if (window.settings.keyboardSleep)
       handle_input();
 
-    redraw = true;
+    
 
-    /* Reset keyboard state for keys not held down anymore. */
-    for (int i = 0; i < ALLEGRO_KEY_MAX; i++) {
-      if (km.keystate[i] == 0)
-        km.key[i] = 0;
-    }
-
-    km.mouse_dx = 0;
-    km.mouse_dy = 0;
-    if (window.settings.turnCamera) {
-      if (mouseSleepUpdate) {
+    if (mouseSleepUpdate) {
+      if (window.settings.turnCamera) {
         al_hide_mouse_cursor(display);
         mouseSleepUpdate = false;
       }
+      else {
+        al_show_mouse_cursor(display);
+      }
+    }
+    km.mouse_dx = 0;
+    km.mouse_dy = 0;
+    if (window.settings.turnCamera) {
       al_set_mouse_xy(display, display_width / 2, display_height / 2);
     }
-    else {
-      al_show_mouse_cursor(display);
-    }
-    window.time.timer = false;
+   
+    redraw = true;
   }
 
   if (redraw ) {
@@ -344,12 +341,12 @@ void knightmare::gameLoop() {
     window.time.renderLog();
     redraw = false;
   }
-  if (al_event_queue_is_empty(queue)) {
+  if (al_is_event_queue_empty(queue)) {
     window.time.processLog();
     if (window.settings.waitForVSync) {
       al_wait_for_vsync();
-      window.time.vsyncLog();
     }
+    window.time.vsyncLog();
   }
   
 }

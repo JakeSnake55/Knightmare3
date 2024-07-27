@@ -28,7 +28,7 @@ Known Issues:
 	Linux shows something in removing the main menu to enter a map leads to a segmentation fault of some kind.
 	ValGrind makes me worried about memory leaks and possible issues. I want to root out all warnings, and possible issues.
 	Game runs really slowly, most of the time is spent on Processing, but disabling keyboard, display and mouse do not affect the time taken.
-
+	(I say really slowly, it's like 30 fps when I see no reason it couldn't handle much higher speeds)
 
 Error Codes:
 0 : No Issues detected

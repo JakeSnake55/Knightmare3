@@ -45,6 +45,8 @@ void clockOut(int value, std::string prefix) {
   ImGui::Text((prefix + "Clock Cycles: %d Clocks, %d milliseconds").c_str(), value, (int)((value*1000.0) / (float)(CLOCKS_PER_SEC)));
 }
 
+
+
 //Builds the Debug window for developer use only
 void Window::buildDebugWindow()
 {
@@ -80,28 +82,30 @@ void Window::buildDebugWindow()
           min[j] = time.frameTimes[j][i]-offset;
       }
     }
-    for (int j = 0; j < 4; j++) {
+    ImGuiContext& g = *GImGui;
+    
+   
       float x = p.x + 4.0f;
       float y = p.y + 80.0f;
-      for (int i = 0; i < DEBUGFRAMES; i++) {
-        int currTime = time.frameTimes[j][(time.point + i) % DEBUGFRAMES];
-        float sz = (float)currTime;
-        float lowTime = 0;
-        if(j>=2)
-          lowTime = time.frameTimes[j-1][(time.point + i) % DEBUGFRAMES];
-        total[j] += currTime-lowTime;
+      for (int i = 0; i < IM_ARRAYSIZE(g.FramerateSecPerFrame); i++) {
+        float currTime = 1000.0*(g.FramerateSecPerFrame[(g.FramerateSecPerFrameIdx + i) % IM_ARRAYSIZE(g.FramerateSecPerFrame)]);
+
+        total[0] += currTime;
         
 
-        draw_list->AddRectFilled(ImVec2(x, y-lowTime), ImVec2(x + thickness, y - sz), colour[j]);
+        draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x + thickness, y - currTime), colour[0]);
         x += thickness;
       }
-    }
+    
 
 
-    ImGui::Dummy(ImVec2((spacing) * 10.2f, (spacing) * 1.0f + 80.0f));
+    ImGui::Dummy(ImVec2((spacing) * 10.2f, (spacing) * 3.0f + 80.0f));
     clockOut(time.clockTicks, "");
     const char * titles[4] = { "Total Time","Process Time","Render Time","VSync Time" };
-    for (int j = 0; j < 4; j++) {
+   
+    
+    ImGui::Text("framerate: %f", g.IO.Framerate);
+    for (int j = 0; j < 1; j++) {
       ImGui::Text(titles[j]);
       clockOut(max[j], "Max ");
       clockOut(min[j], "Min ");
