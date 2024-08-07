@@ -26,7 +26,6 @@ double pitchie = 0;
 Project km;
 
 
-bool mouseSleepUpdate = true;
 bool closeGame = false;
 
 int startSky = 0;
@@ -160,8 +159,6 @@ void knightmare::setup_scene()
 
   km.general = {};
 
-  window.time.refresh = al_get_display_refresh_rate(display);
-
   sky.add_skybox(window, km, startSky, endSky);
 }
 
@@ -217,39 +214,6 @@ void knightmare::handle_input()
   if (io.KeysDown[ALLEGRO_KEY_ESCAPE]) {
     window.cleanExit();
     exit(0);
-  }
-  if (io.KeysDown[ALLEGRO_KEY_Z]) {
-    double m = 20 * pi / 180;
-    km.camera.vertical_field_of_view -= 0.01;
-    if (km.camera.vertical_field_of_view < m)
-      km.camera.vertical_field_of_view = m;
-  }
-  if (io.KeysDown[ALLEGRO_KEY_X]) {
-    double m = 120 * pi / 180;
-    km.camera.vertical_field_of_view += 0.01;
-    if (km.camera.vertical_field_of_view > m)
-      km.camera.vertical_field_of_view = m;
-  }
-  if (io.KeysDown[ALLEGRO_KEY_T]) {
-    window.settings.keyboardSleep = true;
-  }
-  if (io.KeysDown[ALLEGRO_KEY_P]) {
-    window.settings.turnCamera = true;
-  }
-  if (io.KeysDown[ALLEGRO_KEY_U]) {
-    window.settings.turnCamera = false;
-    mouseSleepUpdate = true;
-  }
-  if (io.KeysDown[ALLEGRO_KEY_F]) {
-    window.time.fastmode = true;
-  }
-  if (io.KeysDown[ALLEGRO_KEY_O]) {
-    window.time.tickRate = 60;
-    window.time.fastmode = false;
-  }
-  if (io.KeysDown[ALLEGRO_KEY_I]) {
-    window.time.tickRate = 20;
-    window.time.fastmode = false;
   }
 
   playerMotion(x, y, z);
@@ -318,10 +282,10 @@ void knightmare::gameLoop() {
 
     
 
-    if (mouseSleepUpdate) {
+    if (window.settings.mouseSleepUpdate) {
       if (window.settings.turnCamera) {
         al_hide_mouse_cursor(display);
-        mouseSleepUpdate = false;
+        window.settings.mouseSleepUpdate = false;
       }
       else {
         al_show_mouse_cursor(display);
@@ -334,19 +298,17 @@ void knightmare::gameLoop() {
     }
    
     redraw = true;
+    window.time.timer = false;
   }
 
   if (redraw ) {
     draw_scene();
-    window.time.renderLog();
     redraw = false;
   }
   if (al_is_event_queue_empty(queue)) {
-    window.time.processLog();
     if (window.settings.waitForVSync) {
       al_wait_for_vsync();
     }
-    window.time.vsyncLog();
   }
   
 }

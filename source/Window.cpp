@@ -41,8 +41,8 @@ static void popStyles() {
   ImGui::PopStyleColor(ImGuiCol_COUNT);
 }
 
-void clockOut(int value, std::string prefix) {
-  ImGui::Text((prefix + "Clock Cycles: %d Clocks, %d milliseconds").c_str(), value, (int)((value*1000.0) / (float)(CLOCKS_PER_SEC)));
+void clockOut(float value, std::string prefix) {
+  ImGui::Text((prefix + "Clocks, %f milliseconds").c_str(), value);
 }
 
 
@@ -54,9 +54,9 @@ void Window::buildDebugWindow()
   ImGui::Begin("Debug");
 
   {
-    int max[4] = { 0 };
-    int min[4] = { 999999 };
-    int total[4] = {0};
+    float max[4] = { 0 };
+    float min[4] = { 999999 };
+    float total[4] = { 0 };
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     static float thickness = 3.0f;
@@ -68,54 +68,56 @@ void Window::buildDebugWindow()
     const ImVec2 p = ImGui::GetCursorScreenPos();
 
     const float spacing = 10.0f;
-
-    for (int j = 0; j < 4; j++) {
-      for (int i = 0; i < DEBUGFRAMES; i++) {
-        float offset = 0;
-        if (j >= 2) {
-          offset = time.frameTimes[j - 1][i];
-        }
-        if (time.frameTimes[j][i] - offset > max[j])
-          max[j] = time.frameTimes[j][i]-offset;
-
-        if (time.frameTimes[j][i]-offset < min[j])
-          min[j] = time.frameTimes[j][i]-offset;
-      }
-    }
     ImGuiContext& g = *GImGui;
-    
-   
-      float x = p.x + 4.0f;
-      float y = p.y + 80.0f;
-      for (int i = 0; i < IM_ARRAYSIZE(g.FramerateSecPerFrame); i++) {
-        float currTime = 1000.0*(g.FramerateSecPerFrame[(g.FramerateSecPerFrameIdx + i) % IM_ARRAYSIZE(g.FramerateSecPerFrame)]);
 
-        total[0] += currTime;
-        
 
-        draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x + thickness, y - currTime), colour[0]);
-        x += thickness;
-      }
-    
+    for (int i = 0; i < IM_ARRAYSIZE(g.FramerateSecPerFrame); i++) {
+
+
+      if (g.FramerateSecPerFrame[i] > max[0])
+        max[0] = g.FramerateSecPerFrame[i];
+
+      if (g.FramerateSecPerFrame[i] < min[0])
+        min[0] = g.FramerateSecPerFrame[i];
+    }
+
+
+
+
+    float x = p.x + 4.0f;
+    float y = p.y + 80.0f;
+    for (int i = 0; i < IM_ARRAYSIZE(g.FramerateSecPerFrame); i++) {
+      float currTime = 1000.0 * (g.FramerateSecPerFrame[(g.FramerateSecPerFrameIdx + i) % IM_ARRAYSIZE(g.FramerateSecPerFrame)]);
+
+      total[0] += currTime / 1000.0;
+
+
+      draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x + thickness, y - currTime), colour[0]);
+      x += thickness;
+    }
+
 
 
     ImGui::Dummy(ImVec2((spacing) * 10.2f, (spacing) * 3.0f + 80.0f));
-    clockOut(time.clockTicks, "");
-    const char * titles[4] = { "Total Time","Process Time","Render Time","VSync Time" };
-   
-    
+
+    const char* titles[4] = { "Total Time","Process Time","Render Time","VSync Time" };
+
+
     ImGui::Text("framerate: %f", g.IO.Framerate);
     for (int j = 0; j < 1; j++) {
       ImGui::Text(titles[j]);
       clockOut(max[j], "Max ");
       clockOut(min[j], "Min ");
-      clockOut(total[j] / 100.0, "Avg ");
+      clockOut(total[j] / IM_ARRAYSIZE(g.FramerateSecPerFrame), "Avg ");
     }
-   
+
   }
+  bool camUpdate = settings.turnCamera;
 
   ImGui::Checkbox("Demo Window", &settings.showDemoWindow);//Shows what is possible with ImGui
   ImGui::Checkbox("VSync", &settings.waitForVSync);//Pauses frames to achieve VSync
+  ImGui::Checkbox("Fastforward", &time.fastmode);
+  ImGui::InputInt("Tick rate", &time.tickRate);
   ImGui::Checkbox("WireFrame mode", &settings.wireFrame);
   ImGui::Checkbox("Draw Terrain", &settings.drawTerrain);
   ImGui::Checkbox("Redraw Chunks", &settings.redrawChunks);
@@ -125,7 +127,9 @@ void Window::buildDebugWindow()
   ImGui::SliderFloat("FOV", &settings.FOV, 0, 180, "%.3f");
   ImGui::SliderFloat("Zoom", &settings.zoom, 0, 10, "%.3f");
 
-
+  if (camUpdate != settings.turnCamera) {
+    settings.mouseSleepUpdate = true;
+  }
   ImGui::End();//end a ImGui definition like this always
   popStyles();
 }
@@ -192,6 +196,7 @@ void Window::buildMainMenu()
           if (ImGui::Button("Play"))
           {
             settings.turnCamera = true;
+            settings.mouseSleepUpdate = true;
             settings.currentId = selected;
             settings.showMainMenu = false;
             settings.drawTerrain = true;

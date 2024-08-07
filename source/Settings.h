@@ -17,6 +17,7 @@ public:
 	bool drawSkybox = false;
 	bool turnCamera = false;
 	bool keyboardSleep = true;
+	bool mouseSleepUpdate = false;
 
 	bool redrawChunks = true;
 	float FOV = 70;

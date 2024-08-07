@@ -23,12 +23,8 @@ Planned Features:
   A user friendly installer (maybe a makefile? (though that's only really friendly to programmers))
 
 Known Issues:
-	Linux version has strong flashes while skybox is drawn, Windows has flashing on transparent bits of ImGui's transparency.
-	Linux shows build_chunks() leads to a segmentation fault.
-	Linux shows something in removing the main menu to enter a map leads to a segmentation fault of some kind.
+	Linux shows something in removing the main menu to enter a map leads to a segmentation fault of some kind. (?)
 	ValGrind makes me worried about memory leaks and possible issues. I want to root out all warnings, and possible issues.
-	Game runs really slowly, most of the time is spent on Processing, but disabling keyboard, display and mouse do not affect the time taken.
-	(I say really slowly, it's like 30 fps when I see no reason it couldn't handle much higher speeds)
 
 Error Codes:
 0 : No Issues detected
