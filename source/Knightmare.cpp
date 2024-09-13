@@ -83,11 +83,32 @@ void knightmare::draw_windows() {
 #endif
 
 }
+VoxelSet terrain;
+
+void knightmare::draw_terrain() 
+{
+  terrain.n = 0;
+  ALLEGRO_COLOR white = al_map_rgb(255, 255, 255);
+  int x = 0;
+  int y = 0;
+  int z = 0;
+  //left face
+  add_quad(x, y, z, 0, 0, 1, 0, 1, 0, white, white, window, terrain);
+  //right face
+  add_quad((double)x + 1, y, z, 0, 0, 1, 0, 1, 0, white, white, window, terrain);
+  //back face
+  add_quad(x, y, z, 1, 0, 0, 0, 1, 0, white, white, window, terrain);
+  //front face
+  add_quad(x, y, (double)z + 1, 1, 0, 0, 0, 1, 0, white, white, window, terrain);
+  //bottom face
+  add_quad(x, y, z, 1, 0, 0, 0, 0, 1, white, white, window, terrain);
+  //top face
+  add_quad(x, (double)y + 1, z, 1, 0, 0, 0, 0, 1, white, white, window, terrain);
+}
 
 
 void knightmare::draw_scene()
 {
-  ImGui_ImplAllegro5_NewFrame();
 
   if (window.settings.drawNewSkybox) {
     sky.loadSeed(window.world[window.settings.currentId].seed);
@@ -105,7 +126,7 @@ void knightmare::draw_scene()
   ALLEGRO_COLOR front = al_color_name("white");
   ALLEGRO_COLOR back = al_map_rgba(0, 0, 0, 128);
 
-  ImGui::NewFrame();//Must be before Imgui windows are drawn.
+  
   draw_windows();
   ImGui::Render(); //Must end before primitives are drawn.
   setup_3d_projection(window.settings.FOV);
@@ -117,6 +138,8 @@ void knightmare::draw_scene()
   else {
     al_clear_to_color(back);
   }
+  al_clear_depth_buffer(1);
+  draw_terrain();
 
   if (window.settings.drawSkybox || window.settings.drawTerrain) {
     al_build_camera_transform(&t,
@@ -132,11 +155,14 @@ void knightmare::draw_scene()
     if (!window.settings.wireFrame)
     {
       al_draw_prim(km.general.v, NULL, NULL, startSky, endSky, ALLEGRO_PRIM_TRIANGLE_LIST);
+      al_draw_prim(terrain.v, NULL, NULL, 0, terrain.n, ALLEGRO_PRIM_TRIANGLE_LIST);
     }
     else {
-      al_draw_prim(km.general.v, NULL, NULL, startSky, endSky, ALLEGRO_PRIM_LINE_LIST);
+      al_draw_prim(km.general.v, NULL, NULL, startSky, km.general.n, ALLEGRO_PRIM_LINE_LIST);
     }
   }
+  
+  
   km.general.n = 0;
   ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
   window.render();
@@ -235,8 +261,11 @@ void knightmare::initializeScenes()
 }
 
 void knightmare::gameLoop() {
+
   window.time.changeTime();
   window.time.changeWorldTime();
+  ImGui_ImplAllegro5_NewFrame();
+  ImGui::NewFrame();//Must be before Imgui windows are drawn.
   
   if (!al_is_event_queue_empty(queue)) {
     al_get_next_event(queue, &ev);
@@ -302,6 +331,7 @@ void knightmare::gameLoop() {
   }
 
   if (redraw ) {
+    
     draw_scene();
     redraw = false;
   }

@@ -16,6 +16,7 @@ private:
   void setup_scene();
   void draw_windows();
   void createEventQueue();
+  void draw_terrain();
 
 
 public:
