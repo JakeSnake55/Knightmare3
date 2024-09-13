@@ -21,7 +21,7 @@ LINKFLAGS := $$( pkg-config allegro-5 allegro_font-5 allegro_primitives-5 allegr
 .PHONY: all run clean deepclean install
 
 # The first rule is the default, ie. "make",
-# "make all" and "make parking" mean the same
+# "make all" mean the same
 all: $(OUTPUT)
 
 run: 
@@ -45,7 +45,5 @@ $(OUTPUT): $(OBJECTS)
 	@$(CXX) $(WARNING) $(CXXFLAGS) -MMD -MP -c $< -o $@
 	@echo "Compiled "$< "to "$(patsubst %.cpp,%.o,$<)
 
-install:
-	git clone https://github.com/JakeSnake55/Knightmare3 ./knightmare
 
 

@@ -1,6 +1,5 @@
 #pragma once
 #include <allegro5/allegro5.h>
-#define DEBUG
 
 const int starCount = 100;
 const int spotsCount = 50;
@@ -18,9 +17,10 @@ public:
 	bool drawSkybox = false;
 	bool turnCamera = false;
 	bool keyboardSleep = true;
+	bool mouseSleepUpdate = false;
 
 	bool redrawChunks = true;
-	float FOV = ALLEGRO_PI/2;
+	float FOV = 70;
 	float zoom = 1;
 	bool makeNewWorld = false;
 	int currentId = -1;

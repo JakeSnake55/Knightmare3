@@ -31,7 +31,7 @@ void camera_rotate_around_axis(Camera* c, Vector axis, double radians);
  * right and backwards directions).
  */
 void camera_move_along_direction(Camera* camera, double right,
-    double forward);
+  double forward);
 
 /* Get a vector with y = 0 looking in the opposite direction as the camera z
  * axis. If looking straight up or down returns a 0 vector instead.
@@ -47,7 +47,7 @@ Vector get_ground_right_vector(Camera* camera);
  * only.
  */
 void camera_move_along_ground(Camera* camera, double right,
-    double forward);
+  double forward);
 
 /* Calculate the pitch of the camera. This is the angle between the z axis
  * vector and our direction vector on the y = 0 plane.
@@ -67,4 +67,4 @@ double get_roll(Camera* c);
  * 2 vertical units (-1 to +1) with square pixel aspect and the camera's
  * vertical field of view. Clip distance is always set to 1.
  */
-void setup_3d_projection(float vertical_field_of_view = ALLEGRO_PI/2);
+void setup_3d_projection(float vertical_field_of_view = ALLEGRO_PI / 2);

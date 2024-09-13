@@ -8,6 +8,8 @@ Current features:
 	Full screen starting window
 	Skybox generator from Knightmare 1st version
 	Perspectives from Allegro
+	Loading from incorrect folder will run without assets
+	Set up project to now place executable in expected location on compile
 
 Work in Progress:
 	Debug data
@@ -21,11 +23,8 @@ Planned Features:
   A user friendly installer (maybe a makefile? (though that's only really friendly to programmers))
 
 Known Issues:
-	Linux version has strong flashes while skybox is drawn, Windows has flashing on transparent bits of ImGui's transparency.
-	Linux shows build_chunks() leads to a segmentation fault.
-	Linux shows something in removing the main menu to enter a map leads to a segmentation fault of some kind.
+	Linux shows something in removing the main menu to enter a map leads to a segmentation fault of some kind. (?)
 	ValGrind makes me worried about memory leaks and possible issues. I want to root out all warnings, and possible issues.
-
 
 Error Codes:
 0 : No Issues detected

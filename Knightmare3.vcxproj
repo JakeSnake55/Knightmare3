@@ -84,6 +84,8 @@
     <Allegro_AddonColor>true</Allegro_AddonColor>
     <Allegro_AddonVideo>true</Allegro_AddonVideo>
     <Allegro_LibraryType>StaticMonolithRelease</Allegro_LibraryType>
+    <OutDir>$(SolutionDir)\</OutDir>
+    <TargetName>km</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -171,6 +173,7 @@
     <ClInclude Include="source\IMGUI\imstb_rectpack.h" />
     <ClInclude Include="source\IMGUI\imstb_textedit.h" />
     <ClInclude Include="source\IMGUI\imstb_truetype.h" />
+    <ClInclude Include="source\Knightmare.h" />
     <ClInclude Include="source\knightmare3config.h" />
     <ClInclude Include="source\PerlinNoiseGenerator.h" />
     <ClInclude Include="source\Projection.h" />

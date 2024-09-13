@@ -10,7 +10,6 @@ private:
 	Stars starList[starCount];
 	Orbital moonSpotsList[spotsCount];
 	Orbital sunSpotsList[spotsCount];
-	bool first;
 public:
 	Skybox();
 	void loadSeed(int seed);

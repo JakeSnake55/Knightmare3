@@ -4,10 +4,12 @@
 #include <allegro5/allegro_primitives.h>
 #include <string.h>
 #include <sstream>
+#include <iostream>
 
 #include "IMGUI/imgui_internal.h"
 #include "IMGUI/imgui.h"
 #include "IMGUI/imgui_impl_allegro5.h"
+#include "knightmare3config.h"
 #include "Settings.h"
 #include "World.h"
 #include "Files.h"
@@ -19,14 +21,13 @@
 Window::Window()
 {
   world.resize(0);
-  installs();
   createWindow();
-  createEventQueue();
   setupImgui();
   file.loadWorldFolder(world);
   for (int i = 0; i < ImGuiCol_COUNT; i++) {
     StyleColors[i] = ImGui::GetStyleColorVec4(i);
   }
+  time.syncTime();
 }
 
 void Window::addStyles() {
@@ -40,9 +41,11 @@ static void popStyles() {
   ImGui::PopStyleColor(ImGuiCol_COUNT);
 }
 
-void clockOut(int value, std::string prefix) {
-  ImGui::Text((prefix+"Clock Cycles: %d Clocks, %f Seconds, %d FPS").c_str(), value, (float)(value) / (float)(CLOCKS_PER_SEC), (value == 0) ? -1 : (int)((float)(CLOCKS_PER_SEC) / (float)(value)));
+void clockOut(float value, std::string prefix) {
+  ImGui::Text((prefix + "Clocks, %f milliseconds").c_str(), value);
 }
+
+
 
 //Builds the Debug window for developer use only
 void Window::buildDebugWindow()
@@ -50,74 +53,83 @@ void Window::buildDebugWindow()
   addStyles();
   ImGui::Begin("Debug");
 
- 
-
   {
-    int max = 0;
-    int min = 999999;
-    int total = 0;
-    static int frameTimes[100] = {};
-    static size_t point = 0;
-    frameTimes[point] = timehandler::clockTicks;
-    point = (point + 1) % 100;
+    float max[4] = { 0 };
+    float min[4] = { 999999 };
+    float total[4] = { 0 };
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     static float thickness = 3.0f;
 
+    ImU32 colour[4] = {
+      ImColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)), ImColor(ImVec4(1.0f, 0.0f, 0.0f, 1.0f)),
+      ImColor(ImVec4(0.0f, 1.0f, 0.0f, 1.0f)), ImColor(ImVec4(0.0f, 0.0f, 1.0f, 1.0f)) };
 
     const ImVec2 p = ImGui::GetCursorScreenPos();
-   
+
     const float spacing = 10.0f;
+    ImGuiContext& g = *GImGui;
+
+
+    for (int i = 0; i < IM_ARRAYSIZE(g.FramerateSecPerFrame); i++) {
+
+
+      if (g.FramerateSecPerFrame[i] > max[0])
+        max[0] = g.FramerateSecPerFrame[i];
+
+      if (g.FramerateSecPerFrame[i] < min[0])
+        min[0] = g.FramerateSecPerFrame[i];
+    }
+
+
+
 
     float x = p.x + 4.0f;
     float y = p.y + 80.0f;
+    for (int i = 0; i < IM_ARRAYSIZE(g.FramerateSecPerFrame); i++) {
+      float currTime = 1000.0 * (g.FramerateSecPerFrame[(g.FramerateSecPerFrameIdx + i) % IM_ARRAYSIZE(g.FramerateSecPerFrame)]);
 
-    for (int i = 0; i < 100; i++) {
-      int currTime = frameTimes[i];
-      float sz = (float)currTime;
-      total += currTime;
-      ImU32 col = ImColor(ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-      if (i == point-1) {
-        draw_list->AddRectFilled(ImVec2(x, y-80), ImVec2(x + thickness, y-sz), ImColor(ImVec4(0.4f, 1.0f, 0.4f, 1.0f)));
-      }
-     
-      
-      //Max and Min getting found and kept for info
-      if (currTime > max) 
-      {
-        col = ImColor(ImVec4(0.4f, 0.4f, 1.0f, 1.0f));
-        max = currTime;
-      }
-      if (currTime < min) {
-        col = ImColor(ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
-        min = currTime;
-      }
-      
-      draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x + thickness, y - sz), col);
-      x += thickness;// Vertical line (faster than AddLine, but only handle integer thickness)
+      total[0] += currTime / 1000.0;
+
+
+      draw_list->AddRectFilled(ImVec2(x, y), ImVec2(x + thickness, y - currTime), colour[0]);
+      x += thickness;
     }
 
-    ImGui::Dummy(ImVec2((spacing) * 10.2f, (spacing) * 1.0f+80.0f));
-    clockOut(timehandler::clockTicks,"");
-    clockOut(max,"Max ");
-    clockOut(min, "Min ");
-    clockOut(total/100, "Avg ");
-  }
 
- 
+
+    ImGui::Dummy(ImVec2((spacing) * 10.2f, (spacing) * 3.0f + 80.0f));
+
+    const char* titles[4] = { "Total Time","Process Time","Render Time","VSync Time" };
+
+
+    ImGui::Text("framerate: %f", g.IO.Framerate);
+    for (int j = 0; j < 1; j++) {
+      ImGui::Text(titles[j]);
+      clockOut(max[j], "Max ");
+      clockOut(min[j], "Min ");
+      clockOut(total[j] / IM_ARRAYSIZE(g.FramerateSecPerFrame), "Avg ");
+    }
+
+  }
+  bool camUpdate = settings.turnCamera;
 
   ImGui::Checkbox("Demo Window", &settings.showDemoWindow);//Shows what is possible with ImGui
   ImGui::Checkbox("VSync", &settings.waitForVSync);//Pauses frames to achieve VSync
+  ImGui::Checkbox("Fastforward", &time.fastmode);
+  ImGui::InputInt("Tick rate", &time.tickRate);
   ImGui::Checkbox("WireFrame mode", &settings.wireFrame);
   ImGui::Checkbox("Draw Terrain", &settings.drawTerrain);
   ImGui::Checkbox("Redraw Chunks", &settings.redrawChunks);
   ImGui::Checkbox("Draw Sky", &settings.drawSkybox);
   ImGui::Checkbox("Activate Camera", &settings.turnCamera);
   ImGui::Checkbox("Activate Keyboard", &settings.keyboardSleep);
-  ImGui::SliderFloat("FOV", &settings.FOV, 0, ALLEGRO_PI, "%.3f");
+  ImGui::SliderFloat("FOV", &settings.FOV, 0, 180, "%.3f");
   ImGui::SliderFloat("Zoom", &settings.zoom, 0, 10, "%.3f");
 
-
+  if (camUpdate != settings.turnCamera) {
+    settings.mouseSleepUpdate = true;
+  }
   ImGui::End();//end a ImGui definition like this always
   popStyles();
 }
@@ -162,7 +174,7 @@ void Window::buildMainMenu()
     static int selected = 0;
     {
       ImGui::BeginChild("left pane", ImVec2(157, al_get_display_height(display) - 40), true, ImGuiWindowFlags_NoScrollbar);
-      for (int i = 0; i < world.size(); i++)
+      for (size_t i = 0; i < world.size(); i++)
       {
         if (ImGui::Selectable(world[i].name.c_str(), selected == i))
           selected = i;
@@ -184,6 +196,7 @@ void Window::buildMainMenu()
           if (ImGui::Button("Play"))
           {
             settings.turnCamera = true;
+            settings.mouseSleepUpdate = true;
             settings.currentId = selected;
             settings.showMainMenu = false;
             settings.drawTerrain = true;
@@ -232,30 +245,30 @@ void Window::buildOptionMenu()
   addStyles();
 
   ImGui::Begin("Option Menu", NULL, flags);
-  
 
-    if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
-    {
-      if (ImGui::BeginTabItem("Colours")) {
-        for (int i = 0; i < ImGuiCol_COUNT; i++) {
-          ImGui::ColorEdit4(ImGui::GetStyleColorName(i), (float*)&StyleColors[i]);
-        }
-        ImGui::EndTabItem();
+
+  if (ImGui::BeginTabBar("##Tabs", ImGuiTabBarFlags_None))
+  {
+    if (ImGui::BeginTabItem("Colours")) {
+      for (int i = 0; i < ImGuiCol_COUNT; i++) {
+        ImGui::ColorEdit4(ImGui::GetStyleColorName(i), (float*)&StyleColors[i]);
       }
-
-      if (ImGui::BeginTabItem("Misc")) {
-
-        if (&settings.showOptionsMenu && ImGui::Button("Close Options")) {
-          settings.showOptionsMenu = false;
-        }
-
-        ImGui::EndTabItem();
-      }
-      ImGui::EndTabBar();
+      ImGui::EndTabItem();
     }
 
-    ImGui::End();
-  
+    if (ImGui::BeginTabItem("Misc")) {
+
+      if (&settings.showOptionsMenu && ImGui::Button("Close Options")) {
+        settings.showOptionsMenu = false;
+      }
+
+      ImGui::EndTabItem();
+    }
+    ImGui::EndTabBar();
+  }
+
+  ImGui::End();
+
 
   popStyles();
 }
@@ -303,37 +316,11 @@ void Window::buildWorldCreationMenu(int id) {
 }
 
 
-void Window::installs()
-{
-  if (!al_init())
-    std::exit(1);
-  al_install_keyboard();
-  al_install_mouse();
-  al_init_primitives_addon();
-  al_init_font_addon();
-  al_init_image_addon();
-
-#ifndef IMGUI_VERSION
-  std::exit(2);
-#endif // !IMGUI_VERSION
-}
-
-
 void Window::createWindow()
 {
-  al_set_new_display_flags(ALLEGRO_VSYNC);
   al_set_new_display_flags(ALLEGRO_RESIZABLE);
   display = al_create_display(1280, 720);
   al_set_window_title(display, "Knightmare 3.0");
-}
-
-void Window::createEventQueue()
-{
-  //double FPS = 60.0;
-  queue = al_create_event_queue();
-  al_register_event_source(queue, al_get_display_event_source(display));
-  al_register_event_source(queue, al_get_keyboard_event_source());
-  al_register_event_source(queue, al_get_mouse_event_source());
 }
 
 void Window::setupImgui()
@@ -374,19 +361,12 @@ void Window::cleanExit()
 {
   ImGui_ImplAllegro5_Shutdown();
   ImGui::DestroyContext();
-  al_destroy_event_queue(queue);
+
   al_destroy_display(display);
 }
 
-bool Window::getEvent()
-{
-  return al_get_next_event(queue, &event);
-}
 
 void Window::render()
 {
-  if (settings.waitForVSync)
-    al_wait_for_vsync();
   al_flip_display();
-
 }

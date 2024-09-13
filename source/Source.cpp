@@ -79,7 +79,7 @@ float z = 3;
 // Draw the screen contents
 void drawFrame(Window &window)
 {
-    timehandler::changeTime();
+    window.time.changeTime();
     ImGui_ImplAllegro5_NewFrame();
     ImGui::NewFrame();
 
