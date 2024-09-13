@@ -2,6 +2,7 @@
 #include "Defs.h"
 #include "Window.h"
 #include "DrawCalls.h"
+#include <iostream>
 
 
 /* Adds a new vertex to our scene. */
@@ -9,18 +10,22 @@ void add_vertex(double x, double y, double z,
     ALLEGRO_COLOR color, VoxelSet& vertexList)
 {
 
-    int i = vertexList.n++;
+    size_t i = vertexList.n++;
     if (i >= vertexList.v_size) {
-        if (vertexList.v_size > INT_MAX / 2) {
+        if (vertexList.n > ULONG_MAX-1) {
+            std::cerr<<__FILE__<<" : "<<__LINE__<<" Really really big amount of vertices."<<std::endl;
             exit(3);
         }
         vertexList.v_size += 1;
         vertexList.v_size *= 2;
         ALLEGRO_VERTEX* tmp = (ALLEGRO_VERTEX*)realloc(vertexList.v, vertexList.v_size * sizeof * vertexList.v);
-        if (tmp != NULL) {
-
-            vertexList.v = tmp;
+        if (tmp == NULL) {
+            std::cerr<<__FILE__<<"";
+            
+            exit(4);
         }
+        vertexList.v = tmp;
+        
     }
     vertexList.v[i].x = x;
     vertexList.v[i].y = y;

@@ -38,11 +38,11 @@ typedef struct {
     double vertical_field_of_view; /* In radians. */
 } Camera;
 
-typedef struct {
-    int n, v_size;
+struct VoxelSet{
+    size_t n, v_size;
     ALLEGRO_VERTEX* v;
-
-} VoxelSet;
+    VoxelSet():n(0),v_size(0),v(0){};
+};
 
 typedef struct {
     Camera camera;

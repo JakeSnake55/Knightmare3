@@ -39,49 +39,7 @@ bool closeGame = false;
 int startSky = 0;
 int endSky = 0;
 
-float storedX, storedY, storedZ;
-int chunkX, chunkY, chunkZ;
 
-
-VoxelSet loadedChunks = {};
-
-VoxelSet generatedChunkArray[8][8][8] = {};
-
-Terrain generated[16][16][16] = {};
-
-
-
-/*Generate z height*/
-int height_generator(int x, int y, int size, int chunkZ) {
-  if (chunkZ < 0)
-    return size;
-  if (chunkZ > 0)
-    return 0;
-  return 3 + perlin((chunkY * size + y) * 0.1, (chunkX * size + x) * 0.1) * 3;
-}
-
-/* Generate Checkered cubes*/
-static void chunk_generator(int chunkX = 0, int chunkY = 0, int chunkZ = 0)
-{
-  int z = 0;
-  Terrain tmp = {};
-  int size = 16;
-  for (int x = 0; x < size; x++) {
-    for (int y = 0; y < size; y++) {
-      for (int j = 0; j < 16; j++) {
-        generated[x][y][j].material = NOBLOCK;
-      }
-      z = height_generator(x, y, size, chunkZ);
-
-      Colour stoneColour = { 0.5f,0.5f,0.5f,1 };
-
-      for (int j = 0; (j < z && j < 16); j++) {
-        generated[x][y][j].material = STONE;
-        generated[x][y][j].colour = stoneColour;
-      }
-    }
-  }
-}
 
 static void draw_windows(Window &window) {
   if (window.settings.showOptionsMenu) {
@@ -113,6 +71,7 @@ static void draw_scene(Window& window)
   }
   if (window.settings.drawNewSkybox) {
     sky.loadSeed(window.world[window.settings.currentId].seed);
+    window.settings.drawNewSkybox=false;
   }
 
 
@@ -134,7 +93,7 @@ static void draw_scene(Window& window)
 
   if (window.settings.drawSkybox)
   {
-    startSky = km.general.n;
+    
     sky.add_skybox(window, km, startSky, endSky);
   }
   else {
@@ -165,22 +124,7 @@ static void draw_scene(Window& window)
   al_clear_depth_buffer(1);
   al_set_render_state(ALLEGRO_DEPTH_TEST, 1);
 
-  if (window.settings.drawTerrain) {
-
-    for (int i = 0; i < 8; i++) {
-      for (int j = 0; j < 8; j++) {
-        for (int d = 0; d < 8; d++) {
-          if (!window.settings.wireFrame)
-          {
-            al_draw_prim(generatedChunkArray[i][j][d].v, NULL, NULL, 0, generatedChunkArray[i][j][d].n, ALLEGRO_PRIM_TRIANGLE_LIST);
-          }
-          else {
-            al_draw_prim(generatedChunkArray[i][j][d].v, NULL, NULL, 0, generatedChunkArray[i][j][d].n, ALLEGRO_PRIM_LINE_LIST);
-          }
-        }
-      }
-    }
-  }
+ 
  
   ImGui_ImplAllegro5_RenderDrawData(ImGui::GetDrawData());
   window.render();
@@ -204,7 +148,7 @@ static void setup_scene(Window& window)
   km.general = {};
 
   sky.add_skybox(window, km, startSky, endSky);
-
+  startSky=6*starCount;
 }
 
 void playerMotion(double x, double y, double z, Window& window) {
@@ -346,7 +290,7 @@ int main(int argc, char** argv)
 
   //printf("%d\n", al_get_num_video_adapters());
 
-  timer = al_create_timer(1.0 / al_get_display_refresh_rate(display));
+  timer = al_create_timer(1.0/20.0);
 
 
   al_register_event_source(queue, al_get_timer_event_source(timer));
@@ -426,7 +370,6 @@ int main(int argc, char** argv)
 
     if (redraw && al_is_event_queue_empty(queue)) {
       draw_scene(window);
-      window.render();
       redraw = false;
     }
   }
