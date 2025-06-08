@@ -9,7 +9,7 @@ TITLE = makefile
 #Executable file name
 OUTPUT = km
 
-ARGS=
+ARGS= -O3
 
 # WARNINGS for g++
 WARNING := -Wall -Wextra

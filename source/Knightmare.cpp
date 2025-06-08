@@ -266,8 +266,8 @@ void knightmare::gameLoop() {
   window.time.changeWorldTime();
   ImGui_ImplAllegro5_NewFrame();
   ImGui::NewFrame();//Must be before Imgui windows are drawn.
-  
-  if (!al_is_event_queue_empty(queue)) {
+
+  while (!al_is_event_queue_empty(queue)) {
     al_get_next_event(queue, &ev);
     ImGui_ImplAllegro5_ProcessEvent(&ev);
     switch (ev.type) {
@@ -305,7 +305,7 @@ void knightmare::gameLoop() {
     }
     
   }
-  if (window.time.timer) {
+  if (window.time.timer ) {
     if (window.settings.keyboardSleep)
       handle_input();
 
